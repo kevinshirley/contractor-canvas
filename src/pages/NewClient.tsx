@@ -15,7 +15,8 @@ import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 
 const formSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
+  firstName: z.string().min(2, "First name must be at least 2 characters"),
+  lastName: z.string().min(2, "Last name must be at least 2 characters"),
   company: z.string().min(2, "Company must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
   phone: z.string().min(10, "Phone number must be at least 10 digits"),
@@ -28,7 +29,8 @@ const NewClient = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
+      firstName: "",
+      lastName: "",
       company: "",
       email: "",
       phone: "",
@@ -36,19 +38,13 @@ const NewClient = () => {
   });
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
-    // Generate a unique ID for the new client
     const newClient = {
       id: crypto.randomUUID(),
       ...values,
     };
 
-    // Get existing clients from localStorage
     const existingClients = JSON.parse(localStorage.getItem("clients") || "[]");
-    
-    // Add new client to the array
     const updatedClients = [...existingClients, newClient];
-    
-    // Save back to localStorage
     localStorage.setItem("clients", JSON.stringify(updatedClients));
 
     toast({
@@ -69,12 +65,26 @@ const NewClient = () => {
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <FormField
             control={form.control}
-            name="name"
+            name="firstName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Name</FormLabel>
+                <FormLabel>First Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="John Doe" {...field} />
+                  <Input placeholder="John" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="lastName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Last Name</FormLabel>
+                <FormControl>
+                  <Input placeholder="Doe" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

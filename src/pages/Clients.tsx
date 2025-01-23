@@ -12,7 +12,8 @@ import { useEffect, useState } from "react";
 
 interface Client {
   id: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   company: string;
   phone: string;
@@ -23,7 +24,6 @@ const Clients = () => {
   const [clients, setClients] = useState<Client[]>([]);
 
   useEffect(() => {
-    // Load clients from localStorage
     const storedClients = localStorage.getItem("clients");
     if (storedClients) {
       setClients(JSON.parse(storedClients));
@@ -50,7 +50,7 @@ const Clients = () => {
           <TableBody>
             {clients.map((client) => (
               <TableRow key={client.id}>
-                <TableCell>{client.name}</TableCell>
+                <TableCell>{`${client.firstName} ${client.lastName}`}</TableCell>
                 <TableCell>{client.company}</TableCell>
                 <TableCell>{client.email}</TableCell>
                 <TableCell>{client.phone}</TableCell>
