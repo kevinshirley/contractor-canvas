@@ -5,6 +5,11 @@ import { Link } from "react-router-dom";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useState, useEffect } from "react";
 
+type ContractorHours = {
+  contractorId: string;
+  hours: number;
+}
+
 type Project = {
   id: number;
   name: string;
@@ -12,6 +17,8 @@ type Project = {
   value: number;
   status: string;
   contractors: string[];
+  contractorHours?: ContractorHours[];
+  netValue?: number;
 };
 
 const initialProjects = [
@@ -22,6 +29,8 @@ const initialProjects = [
     value: 15000,
     status: "In Progress",
     contractors: [],
+    contractorHours: [],
+    netValue: 15000,
   },
   {
     id: 2,
@@ -30,6 +39,8 @@ const initialProjects = [
     value: 25000,
     status: "Planning",
     contractors: [],
+    contractorHours: [],
+    netValue: 25000,
   },
   {
     id: 3,
@@ -38,6 +49,8 @@ const initialProjects = [
     value: 10000,
     status: "Completed",
     contractors: [],
+    contractorHours: [],
+    netValue: 10000,
   },
 ];
 
@@ -75,6 +88,13 @@ const Projects = () => {
       })
       .filter(Boolean)
       .join(", ") || "No contractors assigned";
+  };
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(value);
   };
 
   const handleDragStart = (e: React.DragEvent, projectId: number) => {
@@ -139,7 +159,8 @@ const Projects = () => {
                           <h3 className="font-semibold mb-2">{project.name}</h3>
                           <div className="space-y-1 text-sm text-muted-foreground">
                             <p>Client: {getClientName(project.clientId)}</p>
-                            <p>Value: ${project.value}</p>
+                            <p>Value: {formatCurrency(project.value)}</p>
+                            <p>Net Value: {formatCurrency(project.netValue || project.value)}</p>
                             <p>Team: {getContractorNames(project.contractors)}</p>
                           </div>
                         </CardContent>

@@ -45,11 +45,18 @@ const formSchema = z.object({
   status: z.string(),
 });
 
+type ContractorHours = {
+  contractorId: string;
+  hours: number;
+}
+
 const ProjectDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [selectedContractors, setSelectedContractors] = useState<string[]>([]);
+  const [contractorHours, setContractorHours] = useState<ContractorHours[]>([]);
   const [project, setProject] = useState<any>(null);
+  const [netValue, setNetValue] = useState<number>(0);
 
   const clients = JSON.parse(localStorage.getItem("clients") || "[]");
   const contractors = JSON.parse(localStorage.getItem("contractors") || "[]");
@@ -61,11 +68,25 @@ const ProjectDetails = () => {
     if (foundProject) {
       setProject(foundProject);
       setSelectedContractors(foundProject.contractors || []);
+      setContractorHours(foundProject.contractorHours || []);
+      calculateNetValue(foundProject.value, foundProject.contractorHours || []);
     } else {
       toast.error("Project not found");
       navigate("/projects");
     }
   }, [id, navigate]);
+
+  const calculateNetValue = (projectValue: number, hours: ContractorHours[]) => {
+    const totalContractorCost = hours.reduce((acc, curr) => {
+      const contractor = contractors.find((c: any) => c.id.toString() === curr.contractorId);
+      if (!contractor) return acc;
+      
+      const rate = parseFloat(contractor.rate.replace(/[^0-9.]/g, ''));
+      return acc + (rate * curr.hours);
+    }, 0);
+
+    setNetValue(projectValue - totalContractorCost);
+  };
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -83,10 +104,14 @@ const ProjectDetails = () => {
       return;
     }
 
+    const projectValue = parseFloat(values.value);
     const updatedProject = {
       ...project,
       ...values,
+      value: projectValue,
       contractors: selectedContractors,
+      contractorHours: contractorHours,
+      netValue: netValue,
     };
 
     const projects = JSON.parse(localStorage.getItem("projects") || "[]");
@@ -99,6 +124,19 @@ const ProjectDetails = () => {
     navigate("/projects");
   };
 
+  const updateContractorHours = (contractorId: string, hours: number) => {
+    const updatedHours = contractorHours.some(ch => ch.contractorId === contractorId)
+      ? contractorHours.map(ch => 
+          ch.contractorId === contractorId 
+            ? { ...ch, hours } 
+            : ch
+        )
+      : [...contractorHours, { contractorId, hours }];
+    
+    setContractorHours(updatedHours);
+    calculateNetValue(parseFloat(form.getValues("value")), updatedHours);
+  };
+
   const addContractor = (contractorId: string) => {
     if (!selectedContractors.includes(contractorId)) {
       setSelectedContractors([...selectedContractors, contractorId]);
@@ -108,6 +146,7 @@ const ProjectDetails = () => {
 
   const removeContractor = (contractorId: string) => {
     setSelectedContractors(selectedContractors.filter(id => id !== contractorId));
+    setContractorHours(contractorHours.filter(ch => ch.contractorId !== contractorId));
     toast.success("Contractor removed from project");
   };
 
@@ -181,7 +220,7 @@ const ProjectDetails = () => {
               />
 
               <div className="space-y-2">
-                <Label>Contractors</Label>
+                <Label>Contractors and Hours</Label>
                 <Select onValueChange={addContractor}>
                   <SelectTrigger>
                     <SelectValue placeholder="Add contractors" />
@@ -204,14 +243,32 @@ const ProjectDetails = () => {
                     const contractor = contractors.find(
                       (c: any) => c.id.toString() === contractorId
                     );
+                    const contractorHour = contractorHours.find(
+                      ch => ch.contractorId === contractorId
+                    );
                     return contractor ? (
                       <div
                         key={contractorId}
                         className="flex items-center justify-between bg-secondary p-2 rounded-md"
                       >
-                        <span>
-                          {contractor.name} - {contractor.specialty}
-                        </span>
+                        <div className="flex-1">
+                          <span className="block">
+                            {contractor.name} - {contractor.specialty}
+                          </span>
+                          <div className="flex items-center gap-2 mt-1">
+                            <Input
+                              type="number"
+                              min="0"
+                              placeholder="Hours"
+                              className="w-24"
+                              value={contractorHour?.hours || ""}
+                              onChange={(e) => updateContractorHours(contractorId, parseFloat(e.target.value) || 0)}
+                            />
+                            <span className="text-sm text-muted-foreground">
+                              hours @ {contractor.rate}/hr
+                            </span>
+                          </div>
+                        </div>
                         <Button
                           variant="ghost"
                           size="sm"
@@ -232,38 +289,34 @@ const ProjectDetails = () => {
                   <FormItem>
                     <FormLabel>Project Value ($)</FormLabel>
                     <FormControl>
-                      <Input type="number" min="0" step="0.01" {...field} />
+                      <Input 
+                        type="number" 
+                        min="0" 
+                        step="0.01" 
+                        {...field}
+                        onChange={(e) => {
+                          field.onChange(e);
+                          calculateNetValue(parseFloat(e.target.value) || 0, contractorHours);
+                        }}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="status"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Status</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      value={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select status" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Planning">Planning</SelectItem>
-                        <SelectItem value="In Progress">In Progress</SelectItem>
-                        <SelectItem value="Completed">Completed</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div>
+                <Label>Net Project Value</Label>
+                <Input
+                  value={new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'USD'
+                  }).format(netValue)}
+                  readOnly
+                  disabled
+                />
+              </div>
+
             </CardContent>
             <CardFooter className="space-x-2">
               <Button
