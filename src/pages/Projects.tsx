@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Plus } from "lucide-react";
 import { Link } from "react-router-dom";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const mockProjects = [
   {
@@ -27,7 +28,13 @@ const mockProjects = [
   },
 ];
 
+const statusColumns = ["Planning", "In Progress", "Completed"];
+
 const Projects = () => {
+  const getProjectsByStatus = (status: string) => {
+    return mockProjects.filter((project) => project.status === status);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -37,20 +44,34 @@ const Projects = () => {
         </Button>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-3">
-        {mockProjects.map((project) => (
-          <Link key={project.id} to={`/projects/${project.id}`}>
-            <Card className="transition-shadow hover:shadow-md">
-              <CardContent className="p-6">
-                <h3 className="mb-2 font-semibold">{project.name}</h3>
-                <div className="space-y-2 text-sm text-muted-foreground">
-                  <p>Client: {project.client}</p>
-                  <p>Value: ${project.value}</p>
-                  <p>Status: {project.status}</p>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
+      <div className="flex gap-4 h-[calc(100vh-12rem)] overflow-hidden">
+        {statusColumns.map((status) => (
+          <div key={status} className="flex-1 flex flex-col min-w-[300px]">
+            <div className="mb-3">
+              <h2 className="font-semibold text-lg px-2">{status}</h2>
+              <p className="text-sm text-muted-foreground px-2">
+                {getProjectsByStatus(status).length} projects
+              </p>
+            </div>
+
+            <ScrollArea className="flex-1">
+              <div className="space-y-4 p-2">
+                {getProjectsByStatus(status).map((project) => (
+                  <Link key={project.id} to={`/projects/${project.id}`}>
+                    <Card className="transition-shadow hover:shadow-md">
+                      <CardContent className="p-4">
+                        <h3 className="font-semibold mb-2">{project.name}</h3>
+                        <div className="space-y-1 text-sm text-muted-foreground">
+                          <p>Client: {project.client}</p>
+                          <p>Value: ${project.value}</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                ))}
+              </div>
+            </ScrollArea>
+          </div>
         ))}
       </div>
     </div>
