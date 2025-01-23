@@ -13,14 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { UseFormReturn } from "react-hook-form";
-import * as z from "zod";
-
-type FormSchema = {
-  name: string;
-  clientId: string;
-  value: string;
-  status: string;
-};
+import { FormSchema } from "../types";
 
 type ClientFieldProps = {
   form: UseFormReturn<FormSchema>;

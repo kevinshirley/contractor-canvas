@@ -1,6 +1,5 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { CardContent, CardFooter } from "@/components/ui/card";
@@ -9,18 +8,12 @@ import { ContractorsList } from "./ContractorsList";
 import { ProjectNameField } from "./form/ProjectNameField";
 import { ClientField } from "./form/ClientField";
 import { ProjectValueFields } from "./form/ProjectValueFields";
-
-const formSchema = z.object({
-  name: z.string().min(1, "Project name is required"),
-  clientId: z.string().min(1, "Client is required"),
-  value: z.string().min(1, "Project value is required"),
-  status: z.string(),
-});
+import { formSchema, FormSchema } from "./types";
 
 type ProjectFormProps = {
   project: any;
   clients: any[];
-  onSubmit: (values: z.infer<typeof formSchema>) => void;
+  onSubmit: (values: FormSchema) => void;
   selectedContractors: string[];
   netValue: number;
   contractors: any[];
@@ -44,9 +37,9 @@ export const ProjectForm = ({
 }: ProjectFormProps) => {
   const navigate = useNavigate();
   
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
-    values: project ? {
+    defaultValues: project ? {
       name: project.name,
       clientId: project.clientId,
       value: project.value.toString(),
@@ -54,7 +47,7 @@ export const ProjectForm = ({
     } : undefined,
   });
 
-  const handleSubmit = (values: z.infer<typeof formSchema>) => {
+  const handleSubmit = (values: FormSchema) => {
     onSubmit(values);
   };
 

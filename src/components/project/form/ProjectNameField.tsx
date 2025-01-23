@@ -7,14 +7,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { UseFormReturn } from "react-hook-form";
-import * as z from "zod";
-
-type FormSchema = {
-  name: string;
-  clientId: string;
-  value: string;
-  status: string;
-};
+import { FormSchema } from "../types";
 
 type ProjectNameFieldProps = {
   form: UseFormReturn<FormSchema>;
