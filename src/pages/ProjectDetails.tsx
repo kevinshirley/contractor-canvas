@@ -12,16 +12,18 @@ import {
 } from "@/components/ui/breadcrumb";
 import { ProjectForm } from "@/components/project/ProjectForm";
 
+type ContractorHours = {
+  contractorId: string;
+  hours: number;
+  billingType: 'hourly' | 'fixed';
+  fixedAmount?: number;
+};
+
 const ProjectDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [selectedContractors, setSelectedContractors] = useState<string[]>([]);
-  const [contractorHours, setContractorHours] = useState<Array<{
-    contractorId: string;
-    hours: number;
-    billingType: 'hourly' | 'fixed';
-    fixedAmount?: number;
-  }>>([]);
+  const [contractorHours, setContractorHours] = useState<ContractorHours[]>([]);
   const [project, setProject] = useState<any>(null);
   const [netValue, setNetValue] = useState<number>(0);
   const [currentProjectValue, setCurrentProjectValue] = useState<number>(0);
@@ -45,12 +47,7 @@ const ProjectDetails = () => {
     }
   }, [id, navigate]);
 
-  const calculateNetValue = (projectValue: number, hours: Array<{ 
-    contractorId: string; 
-    hours: number;
-    billingType: 'hourly' | 'fixed';
-    fixedAmount?: number;
-  }>) => {
+  const calculateNetValue = (projectValue: number, hours: ContractorHours[]) => {
     const totalContractorCost = hours.reduce((acc, curr) => {
       if (curr.billingType === 'fixed') {
         return acc + (curr.fixedAmount || 0);
@@ -101,7 +98,7 @@ const ProjectDetails = () => {
       : [...contractorHours, { 
           contractorId, 
           hours, 
-          billingType: 'hourly',
+          billingType: 'hourly' as const,
           fixedAmount: 0
         }];
     
@@ -137,7 +134,7 @@ const ProjectDetails = () => {
       setContractorHours([...contractorHours, { 
         contractorId, 
         hours: 0, 
-        billingType: 'hourly',
+        billingType: 'hourly' as const,
         fixedAmount: 0
       }]);
       toast.success("Contractor added to project");
