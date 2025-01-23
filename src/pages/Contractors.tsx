@@ -9,15 +9,27 @@ import {
 } from "@/components/ui/table";
 import { UserPlus, User } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 
-// Temporary mock data - replace with actual data fetching
-const contractors = [
-  { id: 1, name: "John Doe", email: "john@example.com", specialty: "Frontend Development", rate: "$75/hr" },
-  { id: 2, name: "Jane Smith", email: "jane@example.com", specialty: "Backend Development", rate: "$85/hr" },
-];
+interface Contractor {
+  id: number;
+  name: string;
+  email: string;
+  specialty: string;
+  rate: string;
+}
 
 const Contractors = () => {
   const navigate = useNavigate();
+  const [contractors, setContractors] = useState<Contractor[]>([]);
+
+  useEffect(() => {
+    // Load contractors from localStorage on component mount
+    const savedContractors = localStorage.getItem('contractors');
+    if (savedContractors) {
+      setContractors(JSON.parse(savedContractors));
+    }
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -42,21 +54,29 @@ const Contractors = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {contractors.map((contractor) => (
-              <TableRow 
-                key={contractor.id}
-                className="cursor-pointer"
-                onClick={() => navigate(`/contractors/${contractor.id}`)}
-              >
-                <TableCell className="flex items-center">
-                  <User className="mr-2 h-4 w-4" />
-                  {contractor.name}
+            {contractors.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={4} className="text-center text-muted-foreground">
+                  No contractors found. Add your first contractor to get started.
                 </TableCell>
-                <TableCell>{contractor.email}</TableCell>
-                <TableCell>{contractor.specialty}</TableCell>
-                <TableCell>{contractor.rate}</TableCell>
               </TableRow>
-            ))}
+            ) : (
+              contractors.map((contractor) => (
+                <TableRow 
+                  key={contractor.id}
+                  className="cursor-pointer"
+                  onClick={() => navigate(`/contractors/${contractor.id}`)}
+                >
+                  <TableCell className="flex items-center">
+                    <User className="mr-2 h-4 w-4" />
+                    {contractor.name}
+                  </TableCell>
+                  <TableCell>{contractor.email}</TableCell>
+                  <TableCell>{contractor.specialty}</TableCell>
+                  <TableCell>{contractor.rate}</TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </div>
