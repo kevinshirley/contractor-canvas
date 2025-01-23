@@ -1,27 +1,14 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { CardContent, CardFooter } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
 import { ContractorsList } from "./ContractorsList";
+import { ProjectNameField } from "./form/ProjectNameField";
+import { ClientField } from "./form/ClientField";
+import { ProjectValueFields } from "./form/ProjectValueFields";
 
 const formSchema = z.object({
   name: z.string().min(1, "Project name is required"),
@@ -75,48 +62,8 @@ export const ProjectForm = ({
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)}>
         <CardContent className="space-y-4">
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Project Name</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="clientId"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Client</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  value={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a client" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {clients.map((client: any) => (
-                      <SelectItem key={client.id} value={client.id.toString()}>
-                        {client.firstName} {client.lastName} - {client.company}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
+          <ProjectNameField form={form} />
+          <ClientField form={form} clients={clients} />
           <ContractorsList
             contractors={contractors}
             selectedContractors={selectedContractors}
@@ -125,37 +72,7 @@ export const ProjectForm = ({
             onRemoveContractor={onRemoveContractor}
             onUpdateHours={onUpdateHours}
           />
-
-          <FormField
-            control={form.control}
-            name="value"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Project Value ($)</FormLabel>
-                <FormControl>
-                  <Input 
-                    type="number" 
-                    min="0" 
-                    step="0.01" 
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <div>
-            <FormLabel>Net Project Value</FormLabel>
-            <Input
-              value={new Intl.NumberFormat('en-US', {
-                style: 'currency',
-                currency: 'USD'
-              }).format(netValue)}
-              readOnly
-              disabled
-            />
-          </div>
+          <ProjectValueFields form={form} netValue={netValue} />
         </CardContent>
         <CardFooter className="space-x-2">
           <Button
