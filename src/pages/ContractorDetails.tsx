@@ -11,13 +11,25 @@ import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
+import * as z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-interface ContractorFormValues {
-  name: string;
-  email: string;
-  specialty: string;
-  rate: string;
-}
+const formSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  email: z.string().email("Invalid email address"),
+  specialty: z.string().min(1, "Specialty is required"),
+  rate: z.string().refine(
+    (value) => {
+      const numValue = parseFloat(value.replace(/[^0-9.]/g, ''));
+      return !isNaN(numValue) && numValue > 0;
+    },
+    {
+      message: "Rate must be a valid positive number",
+    }
+  ),
+});
+
+type ContractorFormValues = z.infer<typeof formSchema>;
 
 const ContractorDetails = () => {
   const navigate = useNavigate();
@@ -29,21 +41,28 @@ const ContractorDetails = () => {
     name: "John Doe",
     email: "john@example.com",
     specialty: "Frontend Development",
-    rate: "$75/hr",
+    rate: "$75",
   };
 
   const form = useForm<ContractorFormValues>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       name: contractor.name,
       email: contractor.email,
       specialty: contractor.specialty,
-      rate: contractor.rate,
+      rate: contractor.rate.replace(/[^0-9.]/g, ''),
     },
   });
 
   const onSubmit = (data: ContractorFormValues) => {
+    // Format the rate to include the dollar sign
+    const formattedData = {
+      ...data,
+      rate: `$${parseFloat(data.rate).toFixed(2)}`,
+    };
+
     // TODO: Implement actual contractor update logic
-    console.log("Updating contractor:", data);
+    console.log("Updating contractor:", formattedData);
     toast.success("Contractor updated successfully");
     navigate("/contractors");
   };
@@ -104,9 +123,21 @@ const ContractorDetails = () => {
               name="rate"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Hourly Rate</FormLabel>
+                  <FormLabel>Hourly Rate ($)</FormLabel>
                   <FormControl>
-                    <Input placeholder="$75/hr" {...field} />
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      placeholder="75.00"
+                      {...field}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (value === "" || /^\d*\.?\d*$/.test(value)) {
+                          field.onChange(value);
+                        }
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
