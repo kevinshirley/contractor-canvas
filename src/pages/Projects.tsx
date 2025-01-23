@@ -3,8 +3,17 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useState } from "react";
 
-const mockProjects = [
+type Project = {
+  id: number;
+  name: string;
+  client: string;
+  value: number;
+  status: string;
+};
+
+const initialProjects = [
   {
     id: 1,
     name: "Website Redesign",
@@ -31,8 +40,31 @@ const mockProjects = [
 const statusColumns = ["Planning", "In Progress", "Completed"];
 
 const Projects = () => {
+  const [projects, setProjects] = useState<Project[]>(initialProjects);
+
   const getProjectsByStatus = (status: string) => {
-    return mockProjects.filter((project) => project.status === status);
+    return projects.filter((project) => project.status === status);
+  };
+
+  const handleDragStart = (e: React.DragEvent, projectId: number) => {
+    e.dataTransfer.setData("projectId", projectId.toString());
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (e: React.DragEvent, newStatus: string) => {
+    e.preventDefault();
+    const projectId = parseInt(e.dataTransfer.getData("projectId"));
+    
+    setProjects((currentProjects) =>
+      currentProjects.map((project) =>
+        project.id === projectId
+          ? { ...project, status: newStatus }
+          : project
+      )
+    );
   };
 
   return (
@@ -46,7 +78,12 @@ const Projects = () => {
 
       <div className="flex gap-4 h-[calc(100vh-12rem)] overflow-hidden">
         {statusColumns.map((status) => (
-          <div key={status} className="flex-1 flex flex-col min-w-[300px]">
+          <div
+            key={status}
+            className="flex-1 flex flex-col min-w-[300px]"
+            onDragOver={handleDragOver}
+            onDrop={(e) => handleDrop(e, status)}
+          >
             <div className="mb-3">
               <h2 className="font-semibold text-lg px-2">{status}</h2>
               <p className="text-sm text-muted-foreground px-2">
@@ -57,17 +94,23 @@ const Projects = () => {
             <ScrollArea className="flex-1">
               <div className="space-y-4 p-2">
                 {getProjectsByStatus(status).map((project) => (
-                  <Link key={project.id} to={`/projects/${project.id}`}>
-                    <Card className="transition-shadow hover:shadow-md">
-                      <CardContent className="p-4">
-                        <h3 className="font-semibold mb-2">{project.name}</h3>
-                        <div className="space-y-1 text-sm text-muted-foreground">
-                          <p>Client: {project.client}</p>
-                          <p>Value: ${project.value}</p>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </Link>
+                  <div
+                    key={project.id}
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, project.id)}
+                  >
+                    <Link to={`/projects/${project.id}`}>
+                      <Card className="transition-shadow hover:shadow-md">
+                        <CardContent className="p-4">
+                          <h3 className="font-semibold mb-2">{project.name}</h3>
+                          <div className="space-y-1 text-sm text-muted-foreground">
+                            <p>Client: {project.client}</p>
+                            <p>Value: ${project.value}</p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  </div>
                 ))}
               </div>
             </ScrollArea>
