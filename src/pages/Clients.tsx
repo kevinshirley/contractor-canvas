@@ -49,7 +49,11 @@ const Clients = () => {
           </TableHeader>
           <TableBody>
             {clients.map((client) => (
-              <TableRow key={client.id}>
+              <TableRow 
+                key={client.id}
+                className="cursor-pointer"
+                onClick={() => navigate(`/clients/${client.id}`)}
+              >
                 <TableCell>{`${client.firstName} ${client.lastName}`}</TableCell>
                 <TableCell>{client.company}</TableCell>
                 <TableCell>{client.email}</TableCell>
