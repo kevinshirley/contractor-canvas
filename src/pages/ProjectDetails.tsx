@@ -138,14 +138,16 @@ const ProjectDetails = () => {
           selectedContractors={selectedContractors}
           netValue={netValue}
         />
-        <ContractorsList
-          contractors={contractors}
-          selectedContractors={selectedContractors}
-          contractorHours={contractorHours}
-          onAddContractor={addContractor}
-          onRemoveContractor={removeContractor}
-          onUpdateHours={updateContractorHours}
-        />
+        <div className="px-6 pb-6">
+          <ContractorsList
+            contractors={contractors}
+            selectedContractors={selectedContractors}
+            contractorHours={contractorHours}
+            onAddContractor={addContractor}
+            onRemoveContractor={removeContractor}
+            onUpdateHours={updateContractorHours}
+          />
+        </div>
       </Card>
     </div>
   );
