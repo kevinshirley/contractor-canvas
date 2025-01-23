@@ -18,10 +18,10 @@ type Project = {
   status: string;
   contractors: string[];
   contractorHours?: ContractorHours[];
-  netValue?: number;
+  netValue: number;
 };
 
-const initialProjects = [
+const initialProjects: Project[] = [
   {
     id: 1,
     name: "Website Redesign",
@@ -67,7 +67,14 @@ const Projects = () => {
       localStorage.setItem("projects", JSON.stringify(initialProjects));
       setProjects(initialProjects);
     } else {
-      setProjects(JSON.parse(storedProjects));
+      const parsedProjects = JSON.parse(storedProjects);
+      // Ensure all values and netValues are numbers
+      const validatedProjects = parsedProjects.map((project: Project) => ({
+        ...project,
+        value: Number(project.value),
+        netValue: Number(project.netValue || project.value)
+      }));
+      setProjects(validatedProjects);
     }
   }, []);
 
@@ -77,7 +84,7 @@ const Projects = () => {
 
   const calculateColumnNetValue = (status: string) => {
     return getProjectsByStatus(status).reduce((sum, project) => {
-      return sum + (project.netValue || project.value);
+      return sum + Number(project.netValue || project.value);
     }, 0);
   };
 
