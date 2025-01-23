@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -61,6 +61,15 @@ const NewProject = () => {
   });
 
   const handleSubmit = (values: z.infer<typeof formSchema>) => {
+    if (selectedContractors.length === 0) {
+      toast({
+        title: "Warning",
+        description: "Please add at least one contractor to the project",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const newProject = {
       id: Date.now(),
       ...values,
@@ -84,11 +93,19 @@ const NewProject = () => {
   const addContractor = (contractorId: string) => {
     if (!selectedContractors.includes(contractorId)) {
       setSelectedContractors([...selectedContractors, contractorId]);
+      toast({
+        title: "Success",
+        description: "Contractor added to project",
+      });
     }
   };
 
   const removeContractor = (contractorId: string) => {
     setSelectedContractors(selectedContractors.filter(id => id !== contractorId));
+    toast({
+      title: "Success",
+      description: "Contractor removed from project",
+    });
   };
 
   return (
@@ -163,14 +180,16 @@ const NewProject = () => {
                     <SelectValue placeholder="Add contractors" />
                   </SelectTrigger>
                   <SelectContent>
-                    {contractors.map((contractor: any) => (
-                      <SelectItem
-                        key={contractor.id}
-                        value={contractor.id.toString()}
-                      >
-                        {contractor.name} - {contractor.specialty}
-                      </SelectItem>
-                    ))}
+                    {contractors
+                      .filter((contractor: any) => !selectedContractors.includes(contractor.id.toString()))
+                      .map((contractor: any) => (
+                        <SelectItem
+                          key={contractor.id}
+                          value={contractor.id.toString()}
+                        >
+                          {contractor.name} - {contractor.specialty}
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
                 <div className="mt-2 space-y-2">
