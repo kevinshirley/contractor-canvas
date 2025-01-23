@@ -4,7 +4,7 @@ import {
   LayoutDashboard,
   Briefcase,
   Users,
-  UserHardHat,
+  User,
   CreditCard,
   Settings,
 } from "lucide-react";
@@ -16,7 +16,7 @@ const Sidebar = () => {
     { name: "Dashboard", path: "/", icon: LayoutDashboard },
     { name: "Projects", path: "/projects", icon: Briefcase },
     { name: "Clients", path: "/clients", icon: Users },
-    { name: "Contractors", path: "/contractors", icon: UserHardHat },
+    { name: "Contractors", path: "/contractors", icon: User },
     { name: "Payments", path: "/payments", icon: CreditCard },
     { name: "Settings", path: "/settings", icon: Settings },
   ];
