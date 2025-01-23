@@ -13,6 +13,7 @@ import Clients from "./pages/Clients";
 import NewClient from "./pages/NewClient";
 import ClientDetails from "./pages/ClientDetails";
 import Contractors from "./pages/Contractors";
+import NewContractor from "./pages/NewContractor";
 import Payments from "./pages/Payments";
 import Settings from "./pages/Settings";
 
@@ -35,6 +36,7 @@ const App = () => (
             <Route path="/clients/new" element={<NewClient />} />
             <Route path="/clients/:id" element={<ClientDetails />} />
             <Route path="/contractors" element={<Contractors />} />
+            <Route path="/contractors/new" element={<NewContractor />} />
             <Route path="/payments" element={<Payments />} />
             <Route path="/settings" element={<Settings />} />
           </Route>
