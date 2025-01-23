@@ -15,7 +15,8 @@ import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 const formSchema = z.object({
-  name: z.string().min(1, "Name is required"),
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
   email: z.string().email("Invalid email address"),
   specialty: z.string().min(1, "Specialty is required"),
   rate: z.string().refine(
@@ -36,7 +37,8 @@ const NewContractor = () => {
   const form = useForm<ContractorFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
+      firstName: "",
+      lastName: "",
       email: "",
       specialty: "",
       rate: "",
@@ -44,9 +46,10 @@ const NewContractor = () => {
   });
 
   const onSubmit = (data: ContractorFormValues) => {
-    // Format the rate to include the dollar sign
+    // Format the rate to include the dollar sign and combine first and last name
     const formattedData = {
       ...data,
+      name: `${data.firstName} ${data.lastName}`, // Add combined name for compatibility
       rate: `$${parseFloat(data.rate).toFixed(2)}`,
       id: Date.now(), // Use timestamp as a simple unique ID
     };
@@ -73,19 +76,35 @@ const NewContractor = () => {
       <div className="max-w-2xl rounded-lg border p-6">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="John Doe" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="firstName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>First Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="John" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="lastName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Last Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Doe" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             <FormField
               control={form.control}

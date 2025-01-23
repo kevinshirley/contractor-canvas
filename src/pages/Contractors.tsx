@@ -14,6 +14,8 @@ import { useState, useEffect } from "react";
 interface Contractor {
   id: number;
   name: string;
+  firstName?: string;
+  lastName?: string;
   email: string;
   specialty: string;
   rate: string;
