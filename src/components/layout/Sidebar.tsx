@@ -31,32 +31,23 @@ const Sidebar = () => {
 
   return (
     <ShadcnSidebar>
-      <SidebarHeader className="border-b border-sidebar-border p-6">
-        <h1 className="text-2xl font-bold tracking-tight text-primary">
-          ProjectHub
-        </h1>
+      <SidebarHeader className="p-4">
+        <h1 className="text-2xl font-bold text-primary">ProjectHub</h1>
       </SidebarHeader>
-      <SidebarContent className="px-2 py-4">
+      <SidebarContent>
         <SidebarMenu>
           {links.map((link) => {
             const Icon = link.icon;
-            const isActive = location.pathname === link.path;
             return (
-              <SidebarMenuItem key={link.path} className="mb-1">
+              <SidebarMenuItem key={link.path}>
                 <SidebarMenuButton
                   asChild
-                  isActive={isActive}
+                  isActive={location.pathname === link.path}
                   tooltip={link.name}
-                  className={cn(
-                    "w-full rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-                    "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring",
-                    isActive && "bg-sidebar-accent text-sidebar-accent-foreground"
-                  )}
                 >
-                  <Link to={link.path} className="flex items-center gap-3">
-                    <Icon className="h-5 w-5" />
-                    <span className="font-medium">{link.name}</span>
+                  <Link to={link.path}>
+                    <Icon className="h-4 w-4" />
+                    <span>{link.name}</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
