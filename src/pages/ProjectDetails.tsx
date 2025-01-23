@@ -78,6 +78,11 @@ const ProjectDetails = () => {
   });
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
+    if (selectedContractors.length === 0) {
+      toast.error("Please add at least one contractor to the project");
+      return;
+    }
+
     const updatedProject = {
       ...project,
       ...values,
@@ -97,11 +102,13 @@ const ProjectDetails = () => {
   const addContractor = (contractorId: string) => {
     if (!selectedContractors.includes(contractorId)) {
       setSelectedContractors([...selectedContractors, contractorId]);
+      toast.success("Contractor added to project");
     }
   };
 
   const removeContractor = (contractorId: string) => {
     setSelectedContractors(selectedContractors.filter(id => id !== contractorId));
+    toast.success("Contractor removed from project");
   };
 
   if (!project) {
@@ -180,14 +187,16 @@ const ProjectDetails = () => {
                     <SelectValue placeholder="Add contractors" />
                   </SelectTrigger>
                   <SelectContent>
-                    {contractors.map((contractor: any) => (
-                      <SelectItem
-                        key={contractor.id}
-                        value={contractor.id.toString()}
-                      >
-                        {contractor.name} - {contractor.specialty}
-                      </SelectItem>
-                    ))}
+                    {contractors
+                      .filter((contractor: any) => !selectedContractors.includes(contractor.id.toString()))
+                      .map((contractor: any) => (
+                        <SelectItem
+                          key={contractor.id}
+                          value={contractor.id.toString()}
+                        >
+                          {contractor.name} - {contractor.specialty}
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
                 <div className="mt-2 space-y-2">
@@ -195,13 +204,13 @@ const ProjectDetails = () => {
                     const contractor = contractors.find(
                       (c: any) => c.id.toString() === contractorId
                     );
-                    return (
+                    return contractor ? (
                       <div
                         key={contractorId}
                         className="flex items-center justify-between bg-secondary p-2 rounded-md"
                       >
                         <span>
-                          {contractor?.name} - {contractor?.specialty}
+                          {contractor.name} - {contractor.specialty}
                         </span>
                         <Button
                           variant="ghost"
@@ -211,7 +220,7 @@ const ProjectDetails = () => {
                           <X className="h-4 w-4" />
                         </Button>
                       </div>
-                    );
+                    ) : null;
                   })}
                 </div>
               </div>
