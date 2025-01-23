@@ -68,10 +68,6 @@ export const ProjectForm = ({
   });
 
   const handleSubmit = (values: z.infer<typeof formSchema>) => {
-    if (selectedContractors.length === 0) {
-      toast.error("Please add at least one contractor to the project");
-      return;
-    }
     onSubmit(values);
   };
 
