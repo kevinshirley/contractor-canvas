@@ -21,6 +21,7 @@ type ProjectFormProps = {
   onAddContractor: (contractorId: string) => void;
   onRemoveContractor: (contractorId: string) => void;
   onUpdateHours: (contractorId: string, hours: number) => void;
+  onValueChange?: (value: number) => void;
 };
 
 export const ProjectForm = ({
@@ -34,6 +35,7 @@ export const ProjectForm = ({
   onAddContractor,
   onRemoveContractor,
   onUpdateHours,
+  onValueChange,
 }: ProjectFormProps) => {
   const navigate = useNavigate();
   
@@ -65,7 +67,11 @@ export const ProjectForm = ({
             onRemoveContractor={onRemoveContractor}
             onUpdateHours={onUpdateHours}
           />
-          <ProjectValueFields form={form} netValue={netValue} />
+          <ProjectValueFields 
+            form={form} 
+            netValue={netValue}
+            onValueChange={onValueChange}
+          />
         </CardContent>
         <CardFooter className="space-x-2">
           <Button

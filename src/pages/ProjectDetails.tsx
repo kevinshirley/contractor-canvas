@@ -19,6 +19,7 @@ const ProjectDetails = () => {
   const [contractorHours, setContractorHours] = useState<Array<{ contractorId: string; hours: number }>>([]);
   const [project, setProject] = useState<any>(null);
   const [netValue, setNetValue] = useState<number>(0);
+  const [currentProjectValue, setCurrentProjectValue] = useState<number>(0);
 
   const clients = JSON.parse(localStorage.getItem("clients") || "[]");
   const contractors = JSON.parse(localStorage.getItem("contractors") || "[]");
@@ -31,7 +32,8 @@ const ProjectDetails = () => {
       setProject(foundProject);
       setSelectedContractors(foundProject.contractors || []);
       setContractorHours(foundProject.contractorHours || []);
-      calculateNetValue(foundProject.value, foundProject.contractorHours || []);
+      setCurrentProjectValue(parseFloat(foundProject.value) || 0);
+      calculateNetValue(parseFloat(foundProject.value), foundProject.contractorHours || []);
     } else {
       toast.error("Project not found");
       navigate("/projects");
@@ -48,6 +50,11 @@ const ProjectDetails = () => {
     }, 0);
 
     setNetValue(projectValue - totalContractorCost);
+  };
+
+  const handleProjectValueChange = (value: number) => {
+    setCurrentProjectValue(value);
+    calculateNetValue(value, contractorHours);
   };
 
   const onSubmit = (values: any) => {
@@ -81,7 +88,7 @@ const ProjectDetails = () => {
       : [...contractorHours, { contractorId, hours }];
     
     setContractorHours(updatedHours);
-    calculateNetValue(parseFloat(project.value), updatedHours);
+    calculateNetValue(currentProjectValue, updatedHours);
   };
 
   const addContractor = (contractorId: string) => {
@@ -93,11 +100,9 @@ const ProjectDetails = () => {
 
   const removeContractor = (contractorId: string) => {
     setSelectedContractors(selectedContractors.filter(id => id !== contractorId));
-    setContractorHours(contractorHours.filter(ch => ch.contractorId !== contractorId));
-    calculateNetValue(
-      parseFloat(project.value),
-      contractorHours.filter(ch => ch.contractorId !== contractorId)
-    );
+    const updatedHours = contractorHours.filter(ch => ch.contractorId !== contractorId);
+    setContractorHours(updatedHours);
+    calculateNetValue(currentProjectValue, updatedHours);
     toast.success("Contractor removed from project");
   };
 
@@ -136,6 +141,7 @@ const ProjectDetails = () => {
           onAddContractor={addContractor}
           onRemoveContractor={removeContractor}
           onUpdateHours={updateContractorHours}
+          onValueChange={handleProjectValueChange}
         />
       </Card>
     </div>

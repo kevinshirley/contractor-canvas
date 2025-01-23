@@ -6,15 +6,28 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { UseFormReturn } from "react-hook-form";
+import { UseFormReturn, useWatch } from "react-hook-form";
 import { FormSchema } from "../types";
+import { useEffect } from "react";
 
 type ProjectValueFieldsProps = {
   form: UseFormReturn<FormSchema>;
   netValue: number;
+  onValueChange?: (value: number) => void;
 };
 
-export const ProjectValueFields = ({ form, netValue }: ProjectValueFieldsProps) => {
+export const ProjectValueFields = ({ form, netValue, onValueChange }: ProjectValueFieldsProps) => {
+  const value = useWatch({
+    control: form.control,
+    name: "value"
+  });
+
+  useEffect(() => {
+    if (onValueChange && value) {
+      onValueChange(parseFloat(value) || 0);
+    }
+  }, [value, onValueChange]);
+
   return (
     <>
       <FormField
