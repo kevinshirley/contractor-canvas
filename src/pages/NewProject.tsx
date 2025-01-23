@@ -21,31 +21,53 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Link } from "react-router-dom";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { X } from "lucide-react";
+
+const formSchema = z.object({
+  name: z.string().min(1, "Project name is required"),
+  clientId: z.string().min(1, "Client is required"),
+  value: z.string().min(1, "Project value is required"),
+  status: z.string(),
+});
 
 const NewProject = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [name, setName] = useState("");
-  const [client, setClient] = useState("");
-  const [value, setValue] = useState("");
-  const [status, setStatus] = useState("Planning");
+  const [selectedContractors, setSelectedContractors] = useState<string[]>([]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  // Get clients and contractors from localStorage
+  const clients = JSON.parse(localStorage.getItem("clients") || "[]");
+  const contractors = JSON.parse(localStorage.getItem("contractors") || "[]");
 
-    // In a real app, this would be an API call
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: "",
+      clientId: "",
+      value: "",
+      status: "Planning",
+    },
+  });
+
+  const handleSubmit = (values: z.infer<typeof formSchema>) => {
     const newProject = {
-      id: Date.now(), // Temporary ID generation
-      name,
-      client,
-      value: parseFloat(value),
-      status,
+      id: Date.now(),
+      ...values,
+      contractors: selectedContractors,
     };
 
-    // Get existing projects from localStorage or initialize empty array
     const existingProjects = JSON.parse(localStorage.getItem("projects") || "[]");
-    
-    // Add new project
     localStorage.setItem(
       "projects",
       JSON.stringify([...existingProjects, newProject])
@@ -57,6 +79,16 @@ const NewProject = () => {
     });
 
     navigate("/projects");
+  };
+
+  const addContractor = (contractorId: string) => {
+    if (!selectedContractors.includes(contractorId)) {
+      setSelectedContractors([...selectedContractors, contractorId]);
+    }
+  };
+
+  const removeContractor = (contractorId: string) => {
+    setSelectedContractors(selectedContractors.filter(id => id !== contractorId));
   };
 
   return (
@@ -79,59 +111,139 @@ const NewProject = () => {
         <CardHeader>
           <h1 className="text-2xl font-bold">Create New Project</h1>
         </CardHeader>
-        <form onSubmit={handleSubmit}>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Project Name</Label>
-              <Input
-                id="name"
-                required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(handleSubmit)}>
+            <CardContent className="space-y-4">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Project Name</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="client">Client</Label>
-              <Input
-                id="client"
-                required
-                value={client}
-                onChange={(e) => setClient(e.target.value)}
+
+              <FormField
+                control={form.control}
+                name="clientId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Client</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a client" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {clients.map((client: any) => (
+                          <SelectItem key={client.id} value={client.id.toString()}>
+                            {client.firstName} {client.lastName} - {client.company}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="value">Project Value ($)</Label>
-              <Input
-                id="value"
-                type="number"
-                required
-                min="0"
-                step="0.01"
-                value={value}
-                onChange={(e) => setValue(e.target.value)}
+
+              <div className="space-y-2">
+                <Label>Contractors</Label>
+                <Select onValueChange={addContractor}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Add contractors" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {contractors.map((contractor: any) => (
+                      <SelectItem
+                        key={contractor.id}
+                        value={contractor.id.toString()}
+                      >
+                        {contractor.name} - {contractor.specialty}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <div className="mt-2 space-y-2">
+                  {selectedContractors.map((contractorId) => {
+                    const contractor = contractors.find(
+                      (c: any) => c.id.toString() === contractorId
+                    );
+                    return (
+                      <div
+                        key={contractorId}
+                        className="flex items-center justify-between bg-secondary p-2 rounded-md"
+                      >
+                        <span>
+                          {contractor?.name} - {contractor?.specialty}
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeContractor(contractorId)}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <FormField
+                control={form.control}
+                name="value"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Project Value ($)</FormLabel>
+                    <FormControl>
+                      <Input type="number" min="0" step="0.01" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="status">Initial Status</Label>
-              <Select
-                value={status}
-                onValueChange={setStatus}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Planning">Planning</SelectItem>
-                  <SelectItem value="In Progress">In Progress</SelectItem>
-                  <SelectItem value="Completed">Completed</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </CardContent>
-          <CardFooter>
-            <Button type="submit">Create Project</Button>
-          </CardFooter>
-        </form>
+
+              <FormField
+                control={form.control}
+                name="status"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Status</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select status" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="Planning">Planning</SelectItem>
+                        <SelectItem value="In Progress">In Progress</SelectItem>
+                        <SelectItem value="Completed">Completed</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </CardContent>
+            <CardFooter>
+              <Button type="submit">Create Project</Button>
+            </CardFooter>
+          </form>
+        </Form>
       </Card>
     </div>
   );

@@ -8,32 +8,36 @@ import { useState, useEffect } from "react";
 type Project = {
   id: number;
   name: string;
-  client: string;
+  clientId: string;
   value: number;
   status: string;
+  contractors: string[];
 };
 
 const initialProjects = [
   {
     id: 1,
     name: "Website Redesign",
-    client: "Acme Corp",
+    clientId: "1",
     value: 15000,
     status: "In Progress",
+    contractors: [],
   },
   {
     id: 2,
     name: "Mobile App Development",
-    client: "TechStart",
+    clientId: "2",
     value: 25000,
     status: "Planning",
+    contractors: [],
   },
   {
     id: 3,
     name: "Marketing Campaign",
-    client: "GrowthCo",
+    clientId: "3",
     value: 10000,
     status: "Completed",
+    contractors: [],
   },
 ];
 
@@ -41,6 +45,8 @@ const statusColumns = ["Planning", "In Progress", "Completed"];
 
 const Projects = () => {
   const [projects, setProjects] = useState<Project[]>([]);
+  const clients = JSON.parse(localStorage.getItem("clients") || "[]");
+  const contractors = JSON.parse(localStorage.getItem("contractors") || "[]");
 
   useEffect(() => {
     const storedProjects = localStorage.getItem("projects");
@@ -54,6 +60,21 @@ const Projects = () => {
 
   const getProjectsByStatus = (status: string) => {
     return projects.filter((project) => project.status === status);
+  };
+
+  const getClientName = (clientId: string) => {
+    const client = clients.find((c: any) => c.id.toString() === clientId);
+    return client ? `${client.firstName} ${client.lastName}` : "N/A";
+  };
+
+  const getContractorNames = (contractorIds: string[]) => {
+    return contractorIds
+      ?.map((id) => {
+        const contractor = contractors.find((c: any) => c.id.toString() === id);
+        return contractor?.name;
+      })
+      .filter(Boolean)
+      .join(", ") || "No contractors assigned";
   };
 
   const handleDragStart = (e: React.DragEvent, projectId: number) => {
@@ -117,8 +138,9 @@ const Projects = () => {
                         <CardContent className="p-4">
                           <h3 className="font-semibold mb-2">{project.name}</h3>
                           <div className="space-y-1 text-sm text-muted-foreground">
-                            <p>Client: {project.client}</p>
+                            <p>Client: {getClientName(project.clientId)}</p>
                             <p>Value: ${project.value}</p>
+                            <p>Team: {getContractorNames(project.contractors)}</p>
                           </div>
                         </CardContent>
                       </Card>
