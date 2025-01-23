@@ -7,6 +7,10 @@ import Layout from "./components/layout/Layout";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Projects from "./pages/Projects";
+import Clients from "./pages/Clients";
+import Contractors from "./pages/Contractors";
+import Payments from "./pages/Payments";
+import Settings from "./pages/Settings";
 
 const queryClient = new QueryClient();
 
@@ -21,7 +25,10 @@ const App = () => (
           <Route element={<Layout />}>
             <Route path="/" element={<Dashboard />} />
             <Route path="/projects" element={<Projects />} />
-            {/* Other routes will be added as we implement them */}
+            <Route path="/clients" element={<Clients />} />
+            <Route path="/contractors" element={<Contractors />} />
+            <Route path="/payments" element={<Payments />} />
+            <Route path="/settings" element={<Settings />} />
           </Route>
         </Routes>
       </BrowserRouter>
