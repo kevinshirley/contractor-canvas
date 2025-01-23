@@ -75,6 +75,12 @@ const Projects = () => {
     return projects.filter((project) => project.status === status);
   };
 
+  const calculateColumnNetValue = (status: string) => {
+    return getProjectsByStatus(status).reduce((sum, project) => {
+      return sum + (project.netValue || project.value);
+    }, 0);
+  };
+
   const getClientName = (clientId: string) => {
     const client = clients.find((c: any) => c.id.toString() === clientId);
     return client ? `${client.firstName} ${client.lastName}` : "N/A";
@@ -140,9 +146,10 @@ const Projects = () => {
           >
             <div className="mb-3">
               <h2 className="font-semibold text-lg px-2">{status}</h2>
-              <p className="text-sm text-muted-foreground px-2">
-                {getProjectsByStatus(status).length} projects
-              </p>
+              <div className="text-sm text-muted-foreground px-2 space-y-1">
+                <p>{getProjectsByStatus(status).length} projects</p>
+                <p>Total Net Value: {formatCurrency(calculateColumnNetValue(status))}</p>
+              </div>
             </div>
 
             <ScrollArea className="flex-1">
