@@ -22,8 +22,8 @@ const ProjectDetails = () => {
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbLink as={Link} to="/projects">
-              Projects
+            <BreadcrumbLink asChild>
+              <Link to="/projects">Projects</Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
