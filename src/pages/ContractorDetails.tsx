@@ -18,6 +18,7 @@ const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
   email: z.string().email("Invalid email address"),
   specialty: z.string().min(1, "Specialty is required"),
+  currency: z.string().min(1, "Currency is required"),
   rate: z.string().refine(
     (value) => {
       const numValue = parseFloat(value.replace(/[^0-9.]/g, ''));
@@ -35,13 +36,15 @@ const ContractorDetails = () => {
   const navigate = useNavigate();
   const { id } = useParams();
 
-  // Mock data - replace with actual data fetching
-  const contractor = {
+  // Get existing contractors from localStorage
+  const contractors = JSON.parse(localStorage.getItem('contractors') || '[]');
+  const contractor = contractors.find((c: any) => c.id === Number(id)) || {
     id: Number(id),
-    name: "John Doe",
-    email: "john@example.com",
-    specialty: "Frontend Development",
-    rate: "$75",
+    name: "",
+    email: "",
+    specialty: "",
+    currency: "USD",
+    rate: "$0.00",
   };
 
   const form = useForm<ContractorFormValues>({
@@ -50,19 +53,25 @@ const ContractorDetails = () => {
       name: contractor.name,
       email: contractor.email,
       specialty: contractor.specialty,
+      currency: contractor.currency || "USD",
       rate: contractor.rate.replace(/[^0-9.]/g, ''),
     },
   });
 
   const onSubmit = (data: ContractorFormValues) => {
-    // Format the rate to include the dollar sign
+    // Format the rate to include the currency symbol
     const formattedData = {
       ...data,
-      rate: `$${parseFloat(data.rate).toFixed(2)}`,
+      rate: `${data.currency === 'USD' ? '$' : data.currency}${parseFloat(data.rate).toFixed(2)}`,
+      id: Number(id),
     };
 
-    // TODO: Implement actual contractor update logic
-    console.log("Updating contractor:", formattedData);
+    // Update contractor in localStorage
+    const updatedContractors = contractors.map((c: any) => 
+      c.id === Number(id) ? formattedData : c
+    );
+    localStorage.setItem('contractors', JSON.stringify(updatedContractors));
+
     toast.success("Contractor updated successfully");
     navigate("/contractors");
   };
@@ -118,31 +127,54 @@ const ContractorDetails = () => {
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="rate"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Hourly Rate ($)</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      placeholder="75.00"
-                      {...field}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        if (value === "" || /^\d*\.?\d*$/.test(value)) {
-                          field.onChange(value);
-                        }
-                      }}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="currency"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Currency</FormLabel>
+                    <FormControl>
+                      <select
+                        {...field}
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                      >
+                        <option value="USD">USD ($)</option>
+                        <option value="EUR">EUR (€)</option>
+                        <option value="GBP">GBP (£)</option>
+                      </select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="rate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Hourly Rate</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        placeholder="75.00"
+                        {...field}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          if (value === "" || /^\d*\.?\d*$/.test(value)) {
+                            field.onChange(value);
+                          }
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             <div className="flex justify-end gap-4">
               <Button
