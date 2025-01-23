@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 type Project = {
   id: number;
@@ -40,7 +40,18 @@ const initialProjects = [
 const statusColumns = ["Planning", "In Progress", "Completed"];
 
 const Projects = () => {
-  const [projects, setProjects] = useState<Project[]>(initialProjects);
+  const [projects, setProjects] = useState<Project[]>([]);
+
+  useEffect(() => {
+    // Initialize localStorage with mock data if empty
+    const storedProjects = localStorage.getItem("projects");
+    if (!storedProjects) {
+      localStorage.setItem("projects", JSON.stringify(initialProjects));
+      setProjects(initialProjects);
+    } else {
+      setProjects(JSON.parse(storedProjects));
+    }
+  }, []);
 
   const getProjectsByStatus = (status: string) => {
     return projects.filter((project) => project.status === status);
@@ -58,21 +69,24 @@ const Projects = () => {
     e.preventDefault();
     const projectId = parseInt(e.dataTransfer.getData("projectId"));
     
-    setProjects((currentProjects) =>
-      currentProjects.map((project) =>
-        project.id === projectId
-          ? { ...project, status: newStatus }
-          : project
-      )
+    const updatedProjects = projects.map((project) =>
+      project.id === projectId
+        ? { ...project, status: newStatus }
+        : project
     );
+
+    setProjects(updatedProjects);
+    localStorage.setItem("projects", JSON.stringify(updatedProjects));
   };
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Projects</h1>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" /> New Project
+        <Button asChild>
+          <Link to="/projects/new">
+            <Plus className="mr-2 h-4 w-4" /> New Project
+          </Link>
         </Button>
       </div>
 
