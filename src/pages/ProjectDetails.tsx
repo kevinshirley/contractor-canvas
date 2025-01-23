@@ -16,7 +16,12 @@ const ProjectDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [selectedContractors, setSelectedContractors] = useState<string[]>([]);
-  const [contractorHours, setContractorHours] = useState<Array<{ contractorId: string; hours: number }>>([]);
+  const [contractorHours, setContractorHours] = useState<Array<{
+    contractorId: string;
+    hours: number;
+    billingType: 'hourly' | 'fixed';
+    fixedAmount?: number;
+  }>>([]);
   const [project, setProject] = useState<any>(null);
   const [netValue, setNetValue] = useState<number>(0);
   const [currentProjectValue, setCurrentProjectValue] = useState<number>(0);
@@ -40,8 +45,16 @@ const ProjectDetails = () => {
     }
   }, [id, navigate]);
 
-  const calculateNetValue = (projectValue: number, hours: Array<{ contractorId: string; hours: number }>) => {
+  const calculateNetValue = (projectValue: number, hours: Array<{ 
+    contractorId: string; 
+    hours: number;
+    billingType: 'hourly' | 'fixed';
+    fixedAmount?: number;
+  }>) => {
     const totalContractorCost = hours.reduce((acc, curr) => {
+      if (curr.billingType === 'fixed') {
+        return acc + (curr.fixedAmount || 0);
+      }
       const contractor = contractors.find((c: any) => c.id.toString() === curr.contractorId);
       if (!contractor) return acc;
       
@@ -85,7 +98,34 @@ const ProjectDetails = () => {
             ? { ...ch, hours } 
             : ch
         )
-      : [...contractorHours, { contractorId, hours }];
+      : [...contractorHours, { 
+          contractorId, 
+          hours, 
+          billingType: 'hourly',
+          fixedAmount: 0
+        }];
+    
+    setContractorHours(updatedHours);
+    calculateNetValue(currentProjectValue, updatedHours);
+  };
+
+  const updateContractorBillingType = (contractorId: string, billingType: 'hourly' | 'fixed') => {
+    const updatedHours = contractorHours.map(ch => 
+      ch.contractorId === contractorId 
+        ? { ...ch, billingType } 
+        : ch
+    );
+    
+    setContractorHours(updatedHours);
+    calculateNetValue(currentProjectValue, updatedHours);
+  };
+
+  const updateContractorFixedAmount = (contractorId: string, amount: number) => {
+    const updatedHours = contractorHours.map(ch => 
+      ch.contractorId === contractorId 
+        ? { ...ch, fixedAmount: amount } 
+        : ch
+    );
     
     setContractorHours(updatedHours);
     calculateNetValue(currentProjectValue, updatedHours);
@@ -94,6 +134,12 @@ const ProjectDetails = () => {
   const addContractor = (contractorId: string) => {
     if (!selectedContractors.includes(contractorId)) {
       setSelectedContractors([...selectedContractors, contractorId]);
+      setContractorHours([...contractorHours, { 
+        contractorId, 
+        hours: 0, 
+        billingType: 'hourly',
+        fixedAmount: 0
+      }]);
       toast.success("Contractor added to project");
     }
   };
@@ -142,6 +188,8 @@ const ProjectDetails = () => {
           onRemoveContractor={removeContractor}
           onUpdateHours={updateContractorHours}
           onValueChange={handleProjectValueChange}
+          onUpdateBillingType={updateContractorBillingType}
+          onUpdateFixedAmount={updateContractorFixedAmount}
         />
       </Card>
     </div>

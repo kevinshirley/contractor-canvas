@@ -17,11 +17,18 @@ type ProjectFormProps = {
   selectedContractors: string[];
   netValue: number;
   contractors: any[];
-  contractorHours: Array<{ contractorId: string; hours: number }>;
+  contractorHours: Array<{ 
+    contractorId: string; 
+    hours: number;
+    billingType: 'hourly' | 'fixed';
+    fixedAmount?: number;
+  }>;
   onAddContractor: (contractorId: string) => void;
   onRemoveContractor: (contractorId: string) => void;
   onUpdateHours: (contractorId: string, hours: number) => void;
   onValueChange?: (value: number) => void;
+  onUpdateBillingType: (contractorId: string, billingType: 'hourly' | 'fixed') => void;
+  onUpdateFixedAmount: (contractorId: string, amount: number) => void;
 };
 
 export const ProjectForm = ({
@@ -36,6 +43,8 @@ export const ProjectForm = ({
   onRemoveContractor,
   onUpdateHours,
   onValueChange,
+  onUpdateBillingType,
+  onUpdateFixedAmount,
 }: ProjectFormProps) => {
   const navigate = useNavigate();
   
@@ -66,6 +75,8 @@ export const ProjectForm = ({
             onAddContractor={onAddContractor}
             onRemoveContractor={onRemoveContractor}
             onUpdateHours={onUpdateHours}
+            onUpdateBillingType={onUpdateBillingType}
+            onUpdateFixedAmount={onUpdateFixedAmount}
           />
           <ProjectValueFields 
             form={form} 
