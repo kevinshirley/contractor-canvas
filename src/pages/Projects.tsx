@@ -43,7 +43,6 @@ const Projects = () => {
   const [projects, setProjects] = useState<Project[]>([]);
 
   useEffect(() => {
-    // Initialize localStorage with mock data if empty
     const storedProjects = localStorage.getItem("projects");
     if (!storedProjects) {
       localStorage.setItem("projects", JSON.stringify(initialProjects));
@@ -81,20 +80,20 @@ const Projects = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Projects</h1>
-        <Button asChild>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <h1 className="text-2xl font-bold md:text-3xl">Projects</h1>
+        <Button asChild className="w-full sm:w-auto">
           <Link to="/projects/new">
             <Plus className="mr-2 h-4 w-4" /> New Project
           </Link>
         </Button>
       </div>
 
-      <div className="flex gap-4 h-[calc(100vh-12rem)] overflow-hidden">
+      <div className="flex flex-col gap-6 md:flex-row md:gap-4 h-[calc(100vh-12rem)] overflow-hidden">
         {statusColumns.map((status) => (
           <div
             key={status}
-            className="flex-1 flex flex-col min-w-[300px]"
+            className="flex-1 flex flex-col min-w-[280px]"
             onDragOver={handleDragOver}
             onDrop={(e) => handleDrop(e, status)}
           >

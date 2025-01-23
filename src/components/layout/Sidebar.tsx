@@ -8,6 +8,14 @@ import {
   CreditCard,
   Settings,
 } from "lucide-react";
+import {
+  Sidebar as ShadcnSidebar,
+  SidebarContent,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from "@/components/ui/sidebar";
 
 const Sidebar = () => {
   const location = useLocation();
@@ -22,31 +30,32 @@ const Sidebar = () => {
   ];
 
   return (
-    <div className="h-screen w-64 border-r bg-background p-4">
-      <div className="mb-8">
+    <ShadcnSidebar>
+      <SidebarHeader className="p-4">
         <h1 className="text-2xl font-bold text-primary">ProjectHub</h1>
-      </div>
-      <nav className="space-y-2">
-        {links.map((link) => {
-          const Icon = link.icon;
-          return (
-            <Link
-              key={link.path}
-              to={link.path}
-              className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
-                location.pathname === link.path
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
-              )}
-            >
-              <Icon className="h-4 w-4" />
-              {link.name}
-            </Link>
-          );
-        })}
-      </nav>
-    </div>
+      </SidebarHeader>
+      <SidebarContent>
+        <SidebarMenu>
+          {links.map((link) => {
+            const Icon = link.icon;
+            return (
+              <SidebarMenuItem key={link.path}>
+                <SidebarMenuButton
+                  asChild
+                  isActive={location.pathname === link.path}
+                  tooltip={link.name}
+                >
+                  <Link to={link.path}>
+                    <Icon className="h-4 w-4" />
+                    <span>{link.name}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            );
+          })}
+        </SidebarMenu>
+      </SidebarContent>
+    </ShadcnSidebar>
   );
 };
 

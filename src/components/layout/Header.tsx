@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useNavigate } from "react-router-dom";
 
 const Header = () => {
@@ -12,10 +13,13 @@ const Header = () => {
 
   return (
     <header className="border-b bg-background p-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <span className="text-sm text-muted-foreground">Welcome back</span>
-          <span className="font-medium">{user}</span>
+          <SidebarTrigger className="md:hidden" />
+          <div className="hidden md:block">
+            <span className="text-sm text-muted-foreground">Welcome back</span>
+            <span className="ml-2 font-medium">{user}</span>
+          </div>
         </div>
         <Button variant="outline" onClick={handleLogout}>
           Logout
