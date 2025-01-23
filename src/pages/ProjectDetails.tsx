@@ -11,18 +11,12 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { ProjectForm } from "@/components/project/ProjectForm";
-import { ContractorsList } from "@/components/project/ContractorsList";
-
-type ContractorHours = {
-  contractorId: string;
-  hours: number;
-}
 
 const ProjectDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [selectedContractors, setSelectedContractors] = useState<string[]>([]);
-  const [contractorHours, setContractorHours] = useState<ContractorHours[]>([]);
+  const [contractorHours, setContractorHours] = useState<Array<{ contractorId: string; hours: number }>>([]);
   const [project, setProject] = useState<any>(null);
   const [netValue, setNetValue] = useState<number>(0);
 
@@ -44,7 +38,7 @@ const ProjectDetails = () => {
     }
   }, [id, navigate]);
 
-  const calculateNetValue = (projectValue: number, hours: ContractorHours[]) => {
+  const calculateNetValue = (projectValue: number, hours: Array<{ contractorId: string; hours: number }>) => {
     const totalContractorCost = hours.reduce((acc, curr) => {
       const contractor = contractors.find((c: any) => c.id.toString() === curr.contractorId);
       if (!contractor) return acc;
@@ -137,17 +131,12 @@ const ProjectDetails = () => {
           onSubmit={onSubmit}
           selectedContractors={selectedContractors}
           netValue={netValue}
+          contractors={contractors}
+          contractorHours={contractorHours}
+          onAddContractor={addContractor}
+          onRemoveContractor={removeContractor}
+          onUpdateHours={updateContractorHours}
         />
-        <div className="px-6 pb-6">
-          <ContractorsList
-            contractors={contractors}
-            selectedContractors={selectedContractors}
-            contractorHours={contractorHours}
-            onAddContractor={addContractor}
-            onRemoveContractor={removeContractor}
-            onUpdateHours={updateContractorHours}
-          />
-        </div>
       </Card>
     </div>
   );

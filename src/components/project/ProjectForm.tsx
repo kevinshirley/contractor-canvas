@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { CardContent, CardFooter } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { ContractorsList } from "./ContractorsList";
 
 const formSchema = z.object({
   name: z.string().min(1, "Project name is required"),
@@ -35,6 +36,11 @@ type ProjectFormProps = {
   onSubmit: (values: z.infer<typeof formSchema>) => void;
   selectedContractors: string[];
   netValue: number;
+  contractors: any[];
+  contractorHours: Array<{ contractorId: string; hours: number }>;
+  onAddContractor: (contractorId: string) => void;
+  onRemoveContractor: (contractorId: string) => void;
+  onUpdateHours: (contractorId: string, hours: number) => void;
 };
 
 export const ProjectForm = ({
@@ -43,6 +49,11 @@ export const ProjectForm = ({
   onSubmit,
   selectedContractors,
   netValue,
+  contractors,
+  contractorHours,
+  onAddContractor,
+  onRemoveContractor,
+  onUpdateHours,
 }: ProjectFormProps) => {
   const navigate = useNavigate();
   
@@ -108,6 +119,15 @@ export const ProjectForm = ({
                 <FormMessage />
               </FormItem>
             )}
+          />
+
+          <ContractorsList
+            contractors={contractors}
+            selectedContractors={selectedContractors}
+            contractorHours={contractorHours}
+            onAddContractor={onAddContractor}
+            onRemoveContractor={onRemoveContractor}
+            onUpdateHours={onUpdateHours}
           />
 
           <FormField
