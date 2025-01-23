@@ -8,7 +8,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { UserPlus, User } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 // Temporary mock data - replace with actual data fetching
 const contractors = [
@@ -17,6 +17,8 @@ const contractors = [
 ];
 
 const Contractors = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -41,7 +43,11 @@ const Contractors = () => {
           </TableHeader>
           <TableBody>
             {contractors.map((contractor) => (
-              <TableRow key={contractor.id}>
+              <TableRow 
+                key={contractor.id}
+                className="cursor-pointer"
+                onClick={() => navigate(`/contractors/${contractor.id}`)}
+              >
                 <TableCell className="flex items-center">
                   <User className="mr-2 h-4 w-4" />
                   {contractor.name}
