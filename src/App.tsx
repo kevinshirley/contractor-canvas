@@ -6,9 +6,9 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Layout from "./components/layout/Layout";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
-import Projects from "./pages/Projects";
-import ProjectDetails from "./pages/ProjectDetails";
-import NewProject from "./pages/NewProject";
+import Tasks from "./pages/Tasks";
+import TaskDetails from "./pages/TaskDetails";
+import NewTask from "./pages/NewTask";
 import Clients from "./pages/Clients";
 import NewClient from "./pages/NewClient";
 import ClientDetails from "./pages/ClientDetails";
@@ -30,9 +30,9 @@ const App = () => (
           <Route path="/login" element={<Login />} />
           <Route element={<Layout />}>
             <Route path="/" element={<Dashboard />} />
-            <Route path="/projects" element={<Projects />} />
-            <Route path="/projects/new" element={<NewProject />} />
-            <Route path="/projects/:id" element={<ProjectDetails />} />
+            <Route path="/tasks" element={<Tasks />} />
+            <Route path="/tasks/new" element={<NewTask />} />
+            <Route path="/tasks/:id" element={<TaskDetails />} />
             <Route path="/clients" element={<Clients />} />
             <Route path="/clients/new" element={<NewClient />} />
             <Route path="/clients/:id" element={<ClientDetails />} />
