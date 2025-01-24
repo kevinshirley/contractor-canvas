@@ -6,6 +6,19 @@ export const formSchema = z.object({
   value: z.string().min(1, "Task value is required"),
   status: z.string(),
   description: z.string().optional(),
+  subTasks: z.array(z.object({
+    id: z.string(),
+    name: z.string(),
+    completed: z.boolean(),
+    description: z.string().optional(),
+  })).optional(),
 });
 
 export type FormSchema = z.infer<typeof formSchema>;
+
+export type SubTask = {
+  id: string;
+  name: string;
+  completed: boolean;
+  description?: string;
+};

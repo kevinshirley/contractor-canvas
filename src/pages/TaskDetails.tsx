@@ -27,6 +27,8 @@ import { ProjectHeader } from "@/components/project/display/ProjectHeader";
 import { ProjectDetailsView } from "@/components/project/display/ProjectDetails";
 import { ProjectContractors } from "@/components/project/display/ProjectContractors";
 import { Button } from "@/components/ui/button";
+import { SubTasksView } from "@/components/task/display/SubTasksView";
+import { SubTask } from "@/components/task/types";
 
 type ContractorHours = {
   contractorId: string;
@@ -114,46 +116,6 @@ const ProjectDetails = () => {
     setProject(updatedProject);
   };
 
-  const updateContractorHours = (contractorId: string, hours: number) => {
-    const updatedHours = contractorHours.some(ch => ch.contractorId === contractorId)
-      ? contractorHours.map(ch => 
-          ch.contractorId === contractorId 
-            ? { ...ch, hours } 
-            : ch
-        )
-      : [...contractorHours, { 
-          contractorId, 
-          hours, 
-          billingType: 'hourly' as const,
-          fixedAmount: 0
-        }];
-    
-    setContractorHours(updatedHours);
-    calculateNetValue(currentProjectValue, updatedHours);
-  };
-
-  const updateContractorBillingType = (contractorId: string, billingType: 'hourly' | 'fixed') => {
-    const updatedHours = contractorHours.map(ch => 
-      ch.contractorId === contractorId 
-        ? { ...ch, billingType } 
-        : ch
-    );
-    
-    setContractorHours(updatedHours);
-    calculateNetValue(currentProjectValue, updatedHours);
-  };
-
-  const updateContractorFixedAmount = (contractorId: string, amount: number) => {
-    const updatedHours = contractorHours.map(ch => 
-      ch.contractorId === contractorId 
-        ? { ...ch, fixedAmount: amount } 
-        : ch
-    );
-    
-    setContractorHours(updatedHours);
-    calculateNetValue(currentProjectValue, updatedHours);
-  };
-
   const addContractor = (contractorId: string) => {
     if (!selectedContractors.includes(contractorId)) {
       setSelectedContractors([...selectedContractors, contractorId]);
@@ -232,10 +194,28 @@ const ProjectDetails = () => {
             contractorHours={contractorHours}
             onAddContractor={addContractor}
             onRemoveContractor={removeContractor}
-            onUpdateHours={updateContractorHours}
+            onUpdateHours={(contractorId: string, hours: number) => {
+              setContractorHours(
+                contractorHours.map((ch) =>
+                  ch.contractorId === contractorId ? { ...ch, hours } : ch
+                )
+              );
+            }}
             onValueChange={handleProjectValueChange}
-            onUpdateBillingType={updateContractorBillingType}
-            onUpdateFixedAmount={updateContractorFixedAmount}
+            onUpdateBillingType={(contractorId: string, billingType: 'hourly' | 'fixed') => {
+              setContractorHours(
+                contractorHours.map((ch) =>
+                  ch.contractorId === contractorId ? { ...ch, billingType } : ch
+                )
+              );
+            }}
+            onUpdateFixedAmount={(contractorId: string, amount: number) => {
+              setContractorHours(
+                contractorHours.map((ch) =>
+                  ch.contractorId === contractorId ? { ...ch, fixedAmount: amount } : ch
+                )
+              );
+            }}
           />
         ) : project ? (
           <>
@@ -249,11 +229,28 @@ const ProjectDetails = () => {
               projectValue={parseFloat(project.value)}
               netValue={netValue}
               totalContractorCost={currentProjectValue - netValue}
+              description={project.description}
             />
             <ProjectContractors
               selectedContractors={selectedContractors}
               contractors={contractors}
               contractorHours={contractorHours}
+            />
+            <SubTasksView
+              subTasks={project.subTasks || []}
+              onUpdateSubTask={(updatedSubTask) => {
+                const updatedSubTasks = (project.subTasks || []).map(st =>
+                  st.id === updatedSubTask.id ? updatedSubTask : st
+                );
+                const updatedProject = { ...project, subTasks: updatedSubTasks };
+                setProject(updatedProject);
+                
+                const projects = JSON.parse(localStorage.getItem("projects") || "[]");
+                const updatedProjects = projects.map((p: any) =>
+                  p.id.toString() === id ? updatedProject : p
+                );
+                localStorage.setItem("projects", JSON.stringify(updatedProjects));
+              }}
             />
           </>
         ) : null}

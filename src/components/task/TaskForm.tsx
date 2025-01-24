@@ -9,7 +9,9 @@ import { TaskNameField } from "./form/TaskNameField";
 import { ClientField } from "@/components/project/form/ClientField";
 import { TaskValueFields } from "./form/TaskValueFields";
 import { TaskDescriptionField } from "./form/TaskDescriptionField";
-import { formSchema, FormSchema } from "./types";
+import { formSchema, FormSchema, SubTask } from "./types";
+import { SubTaskList } from "./SubTaskList";
+import { useState } from "react";
 
 type TaskFormProps = {
   task: any;
@@ -48,6 +50,7 @@ export const TaskForm = ({
   onUpdateFixedAmount,
 }: TaskFormProps) => {
   const navigate = useNavigate();
+  const [subTasks, setSubTasks] = useState<SubTask[]>(task?.subTasks || []);
   
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
@@ -57,11 +60,12 @@ export const TaskForm = ({
       value: task.value.toString(),
       status: task.status,
       description: task.description || "",
+      subTasks: task.subTasks || [],
     } : undefined,
   });
 
   const handleSubmit = (values: FormSchema) => {
-    onSubmit(values);
+    onSubmit({ ...values, subTasks });
   };
 
   return (
@@ -86,6 +90,16 @@ export const TaskForm = ({
             netValue={netValue}
             onValueChange={onValueChange}
             isTask={true}
+          />
+          <SubTaskList
+            subTasks={subTasks}
+            onAddSubTask={(subTask) => setSubTasks([...subTasks, subTask])}
+            onRemoveSubTask={(id) => setSubTasks(subTasks.filter(st => st.id !== id))}
+            onUpdateSubTask={(updatedSubTask) => 
+              setSubTasks(subTasks.map(st => 
+                st.id === updatedSubTask.id ? updatedSubTask : st
+              ))
+            }
           />
         </CardContent>
         <CardFooter className="space-x-2">
