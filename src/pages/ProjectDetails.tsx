@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { toast } from "sonner";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -90,6 +90,7 @@ const ProjectDetails = () => {
     localStorage.setItem("projects", JSON.stringify(updatedProjects));
     toast.success("Project updated successfully");
     setIsEditing(false);
+    setProject(updatedProject);
   };
 
   const updateContractorHours = (contractorId: string, hours: number) => {
@@ -135,12 +136,13 @@ const ProjectDetails = () => {
   const addContractor = (contractorId: string) => {
     if (!selectedContractors.includes(contractorId)) {
       setSelectedContractors([...selectedContractors, contractorId]);
-      setContractorHours([...contractorHours, { 
-        contractorId, 
-        hours: 0, 
+      const newContractorHour = {
+        contractorId,
+        hours: 0,
         billingType: 'hourly' as const,
         fixedAmount: 0
-      }]);
+      };
+      setContractorHours([...contractorHours, newContractorHour]);
       toast.success("Contractor added to project");
     }
   };
@@ -152,16 +154,6 @@ const ProjectDetails = () => {
     calculateNetValue(currentProjectValue, updatedHours);
     toast.success("Contractor removed from project");
   };
-
-  const totalContractorCost = contractorHours.reduce((acc, curr) => {
-    if (curr.billingType === 'fixed') {
-      return acc + (curr.fixedAmount || 0);
-    }
-    const contractor = contractors.find((c: any) => c.id.toString() === curr.contractorId);
-    if (!contractor) return acc;
-    const rate = parseFloat(contractor.rate.replace(/[^0-9.]/g, ''));
-    return acc + (rate * curr.hours);
-  }, 0);
 
   const client = clients.find((c: any) => c.id === project?.clientId);
 
@@ -209,15 +201,13 @@ const ProjectDetails = () => {
               client={client}
               projectValue={parseFloat(project.value)}
               netValue={netValue}
-              totalContractorCost={totalContractorCost}
+              totalContractorCost={currentProjectValue - netValue}
             />
-            <CardContent>
-              <ProjectContractors
-                selectedContractors={selectedContractors}
-                contractors={contractors}
-                contractorHours={contractorHours}
-              />
-            </CardContent>
+            <ProjectContractors
+              selectedContractors={selectedContractors}
+              contractors={contractors}
+              contractorHours={contractorHours}
+            />
           </>
         ) : null}
       </Card>
