@@ -13,7 +13,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 import { z } from "zod";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { Edit } from "lucide-react";
 
 const formSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters"),
@@ -27,6 +28,8 @@ const ClientDetails = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { id } = useParams();
+  const [isEditing, setIsEditing] = useState(false);
+  const [client, setClient] = useState<any>(null);
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -41,10 +44,11 @@ const ClientDetails = () => {
 
   useEffect(() => {
     const clients = JSON.parse(localStorage.getItem("clients") || "[]");
-    const client = clients.find((c: any) => c.id === id);
+    const foundClient = clients.find((c: any) => c.id === id);
     
-    if (client) {
-      form.reset(client);
+    if (foundClient) {
+      setClient(foundClient);
+      form.reset(foundClient);
     } else {
       navigate("/clients");
       toast({
@@ -67,17 +71,50 @@ const ClientDetails = () => {
       description: "Client has been updated successfully",
     });
 
-    navigate("/clients");
+    setIsEditing(false);
+  };
+
+  const renderDisplayView = () => {
+    if (!client) return null;
+
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <h2 className="text-2xl font-bold">{`${client.firstName} ${client.lastName}`}</h2>
+          <Button onClick={() => setIsEditing(true)}>
+            <Edit className="mr-2 h-4 w-4" />
+            Edit Client
+          </Button>
+        </div>
+        <div className="grid gap-4">
+          <div className="grid gap-2">
+            <p className="text-sm font-medium">Company</p>
+            <p>{client.company}</p>
+          </div>
+          <div className="grid gap-2">
+            <p className="text-sm font-medium">Email</p>
+            <p>{client.email}</p>
+          </div>
+          <div className="grid gap-2">
+            <p className="text-sm font-medium">Phone</p>
+            <p>{client.phone}</p>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Edit Client</h1>
+        <h1 className="text-2xl font-bold">
+          {isEditing ? 'Edit Client' : 'Client Details'}
+        </h1>
       </div>
 
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      {isEditing ? (
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <FormField
             control={form.control}
             name="firstName"
@@ -147,15 +184,17 @@ const ClientDetails = () => {
               </FormItem>
             )}
           />
-
-          <div className="flex justify-end gap-4">
-            <Button variant="outline" onClick={() => navigate("/clients")}>
-              Cancel
-            </Button>
-            <Button type="submit">Update Client</Button>
-          </div>
-        </form>
-      </Form>
+            <div className="flex justify-end gap-4">
+              <Button variant="outline" onClick={() => setIsEditing(false)}>
+                Cancel
+              </Button>
+              <Button type="submit">Update Client</Button>
+            </div>
+          </form>
+        </Form>
+      ) : (
+        renderDisplayView()
+      )}
     </div>
   );
 };

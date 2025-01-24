@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { toast } from "sonner";
 import { Card, CardHeader } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -11,6 +12,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { ProjectForm } from "@/components/project/ProjectForm";
+import { Edit } from "lucide-react";
 
 type ContractorHours = {
   contractorId: string;
@@ -27,6 +29,7 @@ const ProjectDetails = () => {
   const [project, setProject] = useState<any>(null);
   const [netValue, setNetValue] = useState<number>(0);
   const [currentProjectValue, setCurrentProjectValue] = useState<number>(0);
+  const [isEditing, setIsEditing] = useState(false);
 
   const clients = JSON.parse(localStorage.getItem("clients") || "[]");
   const contractors = JSON.parse(localStorage.getItem("contractors") || "[]");
@@ -149,9 +152,59 @@ const ProjectDetails = () => {
     toast.success("Contractor removed from project");
   };
 
-  if (!project) {
-    return null;
-  }
+  const getClientName = (clientId: string) => {
+    const client = clients.find((c: any) => c.id === clientId);
+    return client ? `${client.firstName} ${client.lastName}` : "N/A";
+  };
+
+  const renderDisplayView = () => {
+    if (!project) return null;
+
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <h2 className="text-2xl font-bold">{project.name}</h2>
+          <Button onClick={() => setIsEditing(true)}>
+            <Edit className="mr-2 h-4 w-4" />
+            Edit Project
+          </Button>
+        </div>
+        <div className="grid gap-4">
+          <div className="grid gap-2">
+            <p className="text-sm font-medium">Client</p>
+            <p>{getClientName(project.clientId)}</p>
+          </div>
+          <div className="grid gap-2">
+            <p className="text-sm font-medium">Project Value</p>
+            <p>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(project.value)}</p>
+          </div>
+          <div className="grid gap-2">
+            <p className="text-sm font-medium">Net Value</p>
+            <p>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(netValue)}</p>
+          </div>
+          <div className="grid gap-2">
+            <p className="text-sm font-medium">Status</p>
+            <p>{project.status}</p>
+          </div>
+          <div className="grid gap-2">
+            <p className="text-sm font-medium">Contractors</p>
+            <div className="space-y-1">
+              {selectedContractors.map((contractorId) => {
+                const contractor = contractors.find((c: any) => c.id.toString() === contractorId);
+                const hours = contractorHours.find(ch => ch.contractorId === contractorId);
+                if (!contractor) return null;
+                return (
+                  <p key={contractorId}>
+                    {contractor.name} - {hours?.hours || 0} hours
+                  </p>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="space-y-6">
@@ -164,30 +217,34 @@ const ProjectDetails = () => {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>Edit Project</BreadcrumbPage>
+            <BreadcrumbPage>{isEditing ? 'Edit Project' : 'Project Details'}</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
 
       <Card>
         <CardHeader>
-          <h1 className="text-2xl font-bold">Edit Project</h1>
+          <h1 className="text-2xl font-bold">{isEditing ? 'Edit Project' : 'Project Details'}</h1>
         </CardHeader>
-        <ProjectForm
-          project={project}
-          clients={clients}
-          onSubmit={onSubmit}
-          selectedContractors={selectedContractors}
-          netValue={netValue}
-          contractors={contractors}
-          contractorHours={contractorHours}
-          onAddContractor={addContractor}
-          onRemoveContractor={removeContractor}
-          onUpdateHours={updateContractorHours}
-          onValueChange={handleProjectValueChange}
-          onUpdateBillingType={updateContractorBillingType}
-          onUpdateFixedAmount={updateContractorFixedAmount}
-        />
+        {isEditing ? (
+          <ProjectForm
+            project={project}
+            clients={clients}
+            onSubmit={onSubmit}
+            selectedContractors={selectedContractors}
+            netValue={netValue}
+            contractors={contractors}
+            contractorHours={contractorHours}
+            onAddContractor={addContractor}
+            onRemoveContractor={removeContractor}
+            onUpdateHours={updateContractorHours}
+            onValueChange={handleProjectValueChange}
+            onUpdateBillingType={updateContractorBillingType}
+            onUpdateFixedAmount={updateContractorFixedAmount}
+          />
+        ) : (
+          renderDisplayView()
+        )}
       </Card>
     </div>
   );

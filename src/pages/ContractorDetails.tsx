@@ -13,6 +13,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
+import { Edit } from "lucide-react";
 
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -35,6 +37,7 @@ type ContractorFormValues = z.infer<typeof formSchema>;
 const ContractorDetails = () => {
   const navigate = useNavigate();
   const { id } = useParams();
+  const [isEditing, setIsEditing] = useState(false);
 
   // Get existing contractors from localStorage
   const contractors = JSON.parse(localStorage.getItem('contractors') || '[]');
@@ -59,32 +62,59 @@ const ContractorDetails = () => {
   });
 
   const onSubmit = (data: ContractorFormValues) => {
-    // Format the rate to include the currency symbol
     const formattedData = {
       ...data,
       rate: `${data.currency === 'USD' ? '$' : data.currency}${parseFloat(data.rate).toFixed(2)}`,
       id: Number(id),
     };
 
-    // Update contractor in localStorage
     const updatedContractors = contractors.map((c: any) => 
       c.id === Number(id) ? formattedData : c
     );
     localStorage.setItem('contractors', JSON.stringify(updatedContractors));
 
     toast.success("Contractor updated successfully");
-    navigate("/contractors");
+    setIsEditing(false);
   };
+
+  const renderDisplayView = () => (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold">{contractor.name}</h2>
+        <Button onClick={() => setIsEditing(true)}>
+          <Edit className="mr-2 h-4 w-4" />
+          Edit Contractor
+        </Button>
+      </div>
+      <div className="grid gap-4">
+        <div className="grid gap-2">
+          <p className="text-sm font-medium">Email</p>
+          <p>{contractor.email}</p>
+        </div>
+        <div className="grid gap-2">
+          <p className="text-sm font-medium">Specialty</p>
+          <p>{contractor.specialty}</p>
+        </div>
+        <div className="grid gap-2">
+          <p className="text-sm font-medium">Rate</p>
+          <p>{contractor.rate}</p>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Edit Contractor</h1>
+        <h1 className="text-2xl font-bold">
+          {isEditing ? 'Edit Contractor' : 'Contractor Details'}
+        </h1>
       </div>
 
       <div className="max-w-2xl rounded-lg border p-6">
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        {isEditing ? (
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
               control={form.control}
               name="name"
@@ -175,19 +205,21 @@ const ContractorDetails = () => {
                 )}
               />
             </div>
-
-            <div className="flex justify-end gap-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => navigate("/contractors")}
-              >
-                Cancel
-              </Button>
-              <Button type="submit">Save Changes</Button>
-            </div>
-          </form>
-        </Form>
+              <div className="flex justify-end gap-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsEditing(false)}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit">Save Changes</Button>
+              </div>
+            </form>
+          </Form>
+        ) : (
+          renderDisplayView()
+        )}
       </div>
     </div>
   );
