@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -20,7 +20,6 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Link } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -80,7 +79,7 @@ const NewProject = () => {
       id: Date.now(),
       ...values,
       contractors: selectedContractors,
-      contractorHours: contractorHours, // Add contractorHours to the project data
+      contractorHours: contractorHours,
     };
 
     const existingProjects = JSON.parse(localStorage.getItem("projects") || "[]");
@@ -100,7 +99,6 @@ const NewProject = () => {
   const addContractor = (contractorId: string) => {
     if (!selectedContractors.includes(contractorId)) {
       setSelectedContractors([...selectedContractors, contractorId]);
-      // Initialize contractor hours when adding a contractor
       setContractorHours([
         ...contractorHours,
         {
@@ -119,7 +117,6 @@ const NewProject = () => {
 
   const removeContractor = (contractorId: string) => {
     setSelectedContractors(selectedContractors.filter(id => id !== contractorId));
-    // Remove contractor hours when removing a contractor
     setContractorHours(contractorHours.filter(ch => ch.contractorId !== contractorId));
     toast({
       title: "Success",
@@ -132,8 +129,8 @@ const NewProject = () => {
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbLink>
-              <Link to="/projects">Projects</BreadcrumbLink>
+            <BreadcrumbLink asChild>
+              <Link to="/projects">Projects</Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
