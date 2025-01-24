@@ -6,7 +6,6 @@ import { TaskForm } from "@/components/task/TaskForm";
 import { TaskHeader } from "@/components/task/display/TaskHeader";
 import { TaskDetailsView } from "@/components/task/display/TaskDetails";
 import { TaskContractors } from "@/components/task/display/TaskContractors";
-import { SubTasksView } from "@/components/task/display/SubTasksView";
 import { TaskBreadcrumb } from "@/components/task/display/TaskBreadcrumb";
 import { TaskActions } from "@/components/task/display/TaskActions";
 import { FormSchema } from "@/components/task/types";
@@ -173,23 +172,6 @@ const TaskDetails = () => {
               selectedContractors={selectedContractors}
               contractors={contractors}
               contractorHours={contractorHours}
-            />
-            <SubTasksView
-              subTasks={task.subTasks || []}
-              contractors={contractors}
-              onUpdateSubTask={(updatedSubTask) => {
-                const updatedSubTasks = (task.subTasks || []).map((st: any) =>
-                  st.id === updatedSubTask.id ? updatedSubTask : st
-                );
-                const updatedTask = { ...task, subTasks: updatedSubTasks };
-                setTask(updatedTask);
-                
-                const tasks = JSON.parse(localStorage.getItem("tasks") || "[]");
-                const updatedTasks = tasks.map((p: any) =>
-                  p.id.toString() === id ? updatedTask : p
-                );
-                localStorage.setItem("tasks", JSON.stringify(updatedTasks));
-              }}
             />
           </>
         ) : null}
