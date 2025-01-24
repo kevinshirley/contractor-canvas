@@ -74,13 +74,13 @@ export const TaskForm = ({
           
           {tasks.length > 0 && (
             <div className="space-y-2">
-              <label className="text-sm font-medium">Parent Task (Optional)</label>
+              <label className="text-sm font-medium">Make this a subtask of (Optional)</label>
               <Select
                 value={form.watch("parentTaskId")}
                 onValueChange={(value) => form.setValue("parentTaskId", value)}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select parent task" />
+                  <SelectValue placeholder="Select main task" />
                 </SelectTrigger>
                 <SelectContent>
                   {tasks

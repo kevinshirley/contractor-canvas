@@ -39,7 +39,7 @@ export const TaskDetailsView = ({
               <div className="flex items-center space-x-4 text-muted-foreground">
                 <FileText className="h-5 w-5" />
                 <div className="space-y-1">
-                  <p className="text-sm font-medium text-foreground">Parent Task</p>
+                  <p className="text-sm font-medium text-foreground">This is a subtask of</p>
                   <Link to={`/tasks/${parentTask.id}`} className="text-blue-500 hover:underline">
                     {parentTask.name}
                   </Link>
