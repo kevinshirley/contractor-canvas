@@ -8,113 +8,120 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
-import { toast } from "sonner";
-import * as z from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
-import { Edit } from "lucide-react";
+import { z } from "zod";
+import { useEffect, useState } from "react";
+import { Edit, User, DollarSign, Briefcase } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 
 const formSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  email: z.string().email("Invalid email address"),
-  specialty: z.string().min(1, "Specialty is required"),
-  currency: z.string().min(1, "Currency is required"),
-  rate: z.string().refine(
-    (value) => {
-      const numValue = parseFloat(value.replace(/[^0-9.]/g, ''));
-      return !isNaN(numValue) && numValue > 0;
-    },
-    {
-      message: "Rate must be a valid positive number",
-    }
-  ),
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  rate: z.string().min(1, "Rate is required"),
+  specialty: z.string().min(2, "Specialty must be at least 2 characters"),
 });
 
-type ContractorFormValues = z.infer<typeof formSchema>;
-
 const ContractorDetails = () => {
+  const { toast } = useToast();
   const navigate = useNavigate();
   const { id } = useParams();
   const [isEditing, setIsEditing] = useState(false);
-
-  // Get existing contractors from localStorage
-  const contractors = JSON.parse(localStorage.getItem('contractors') || '[]');
-  const contractor = contractors.find((c: any) => c.id === Number(id)) || {
-    id: Number(id),
-    name: "",
-    email: "",
-    specialty: "",
-    currency: "USD",
-    rate: "$0.00",
-  };
-
-  const form = useForm<ContractorFormValues>({
+  const [contractor, setContractor] = useState<any>(null);
+  
+  const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: contractor.name,
-      email: contractor.email,
-      specialty: contractor.specialty,
-      currency: contractor.currency || "USD",
-      rate: contractor.rate.replace(/[^0-9.]/g, ''),
+      name: "",
+      rate: "",
+      specialty: "",
     },
   });
 
-  const onSubmit = (data: ContractorFormValues) => {
-    const formattedData = {
-      ...data,
-      rate: `${data.currency === 'USD' ? '$' : data.currency}${parseFloat(data.rate).toFixed(2)}`,
-      id: Number(id),
-    };
+  useEffect(() => {
+    const contractors = JSON.parse(localStorage.getItem("contractors") || "[]");
+    const foundContractor = contractors.find((c: any) => c.id === id);
+    
+    if (foundContractor) {
+      setContractor(foundContractor);
+      form.reset(foundContractor);
+    } else {
+      navigate("/contractors");
+      toast({
+        title: "Error",
+        description: "Contractor not found",
+      });
+    }
+  }, [id, form, navigate, toast]);
 
-    const updatedContractors = contractors.map((c: any) => 
-      c.id === Number(id) ? formattedData : c
+  const onSubmit = (values: z.infer<typeof formSchema>) => {
+    const contractors = JSON.parse(localStorage.getItem("contractors") || "[]");
+    const updatedContractors = contractors.map((contractor: any) =>
+      contractor.id === id ? { ...contractor, ...values } : contractor
     );
-    localStorage.setItem('contractors', JSON.stringify(updatedContractors));
+    
+    localStorage.setItem("contractors", JSON.stringify(updatedContractors));
 
-    toast.success("Contractor updated successfully");
+    toast({
+      title: "Success",
+      description: "Contractor has been updated successfully",
+    });
+
     setIsEditing(false);
   };
 
-  const renderDisplayView = () => (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">{contractor.name}</h2>
-        <Button onClick={() => setIsEditing(true)}>
-          <Edit className="mr-2 h-4 w-4" />
-          Edit Contractor
-        </Button>
-      </div>
-      <div className="grid gap-4">
-        <div className="grid gap-2">
-          <p className="text-sm font-medium">Email</p>
-          <p>{contractor.email}</p>
-        </div>
-        <div className="grid gap-2">
-          <p className="text-sm font-medium">Specialty</p>
-          <p>{contractor.specialty}</p>
-        </div>
-        <div className="grid gap-2">
-          <p className="text-sm font-medium">Rate</p>
-          <p>{contractor.rate}</p>
-        </div>
-      </div>
-    </div>
-  );
+  const renderDisplayView = () => {
+    if (!contractor) return null;
+
+    return (
+      <Card>
+        <CardHeader className="space-y-1">
+          <div className="flex justify-between items-center">
+            <div className="space-y-1">
+              <CardTitle className="text-2xl font-bold">{contractor.name}</CardTitle>
+              <Badge variant="secondary" className="text-sm">
+                {contractor.specialty}
+              </Badge>
+            </div>
+            <Button onClick={() => setIsEditing(true)} variant="outline">
+              <Edit className="mr-2 h-4 w-4" />
+              Edit Contractor
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="space-y-4">
+            <div className="flex items-center space-x-4 text-muted-foreground">
+              <DollarSign className="h-5 w-5" />
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-foreground">Rate</p>
+                <p>{contractor.rate}</p>
+              </div>
+            </div>
+            
+            <Separator />
+            
+            <div className="flex items-center space-x-4 text-muted-foreground">
+              <Briefcase className="h-5 w-5" />
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-foreground">Specialty</p>
+                <p>{contractor.specialty}</p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">
-          {isEditing ? 'Edit Contractor' : 'Contractor Details'}
-        </h1>
-      </div>
-
-      <div className="max-w-2xl rounded-lg border p-6">
-        {isEditing ? (
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+    <div className="space-y-4">
+      {isEditing ? (
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
               control={form.control}
               name="name"
@@ -122,7 +129,7 @@ const ContractorDetails = () => {
                 <FormItem>
                   <FormLabel>Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="John Doe" {...field} />
+                    <Input placeholder="Contractor Name" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -131,12 +138,12 @@ const ContractorDetails = () => {
 
             <FormField
               control={form.control}
-              name="email"
+              name="rate"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>Rate</FormLabel>
                   <FormControl>
-                    <Input type="email" placeholder="john@example.com" {...field} />
+                    <Input placeholder="Rate" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -150,77 +157,23 @@ const ContractorDetails = () => {
                 <FormItem>
                   <FormLabel>Specialty</FormLabel>
                   <FormControl>
-                    <Input placeholder="Frontend Development" {...field} />
+                    <Input placeholder="Specialty" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="currency"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Currency</FormLabel>
-                    <FormControl>
-                      <select
-                        {...field}
-                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                      >
-                        <option value="USD">USD ($)</option>
-                        <option value="EUR">EUR (€)</option>
-                        <option value="GBP">GBP (£)</option>
-                      </select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="rate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Hourly Rate</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        placeholder="75.00"
-                        {...field}
-                        onChange={(e) => {
-                          const value = e.target.value;
-                          if (value === "" || /^\d*\.?\d*$/.test(value)) {
-                            field.onChange(value);
-                          }
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            <div className="flex justify-end gap-4">
+              <Button variant="outline" onClick={() => setIsEditing(false)}>
+                Cancel
+              </Button>
+              <Button type="submit">Update Contractor</Button>
             </div>
-              <div className="flex justify-end gap-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setIsEditing(false)}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit">Save Changes</Button>
-              </div>
-            </form>
-          </Form>
-        ) : (
-          renderDisplayView()
-        )}
-      </div>
+          </form>
+        </Form>
+      ) : (
+        renderDisplayView()
+      )}
     </div>
   );
 };

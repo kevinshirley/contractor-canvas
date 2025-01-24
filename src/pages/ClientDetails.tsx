@@ -8,13 +8,15 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 import { z } from "zod";
 import { useEffect, useState } from "react";
-import { Edit } from "lucide-react";
+import { Edit, Mail, Phone, Building2, User } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
 const formSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters"),
@@ -78,40 +80,55 @@ const ClientDetails = () => {
     if (!client) return null;
 
     return (
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-bold">{`${client.firstName} ${client.lastName}`}</h2>
-          <Button onClick={() => setIsEditing(true)}>
-            <Edit className="mr-2 h-4 w-4" />
-            Edit Client
-          </Button>
-        </div>
-        <div className="grid gap-4">
-          <div className="grid gap-2">
-            <p className="text-sm font-medium">Company</p>
-            <p>{client.company}</p>
+      <Card>
+        <CardHeader className="space-y-1">
+          <div className="flex justify-between items-center">
+            <CardTitle className="text-2xl font-bold">
+              {`${client.firstName} ${client.lastName}`}
+            </CardTitle>
+            <Button onClick={() => setIsEditing(true)} variant="outline">
+              <Edit className="mr-2 h-4 w-4" />
+              Edit Client
+            </Button>
           </div>
-          <div className="grid gap-2">
-            <p className="text-sm font-medium">Email</p>
-            <p>{client.email}</p>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="space-y-4">
+            <div className="flex items-center space-x-4 text-muted-foreground">
+              <Building2 className="h-5 w-5" />
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-foreground">Company</p>
+                <p>{client.company}</p>
+              </div>
+            </div>
+            
+            <Separator />
+            
+            <div className="flex items-center space-x-4 text-muted-foreground">
+              <Mail className="h-5 w-5" />
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-foreground">Email</p>
+                <p>{client.email}</p>
+              </div>
+            </div>
+            
+            <Separator />
+            
+            <div className="flex items-center space-x-4 text-muted-foreground">
+              <Phone className="h-5 w-5" />
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-foreground">Phone</p>
+                <p>{client.phone}</p>
+              </div>
+            </div>
           </div>
-          <div className="grid gap-2">
-            <p className="text-sm font-medium">Phone</p>
-            <p>{client.phone}</p>
-          </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     );
   };
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">
-          {isEditing ? 'Edit Client' : 'Client Details'}
-        </h1>
-      </div>
-
       {isEditing ? (
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
