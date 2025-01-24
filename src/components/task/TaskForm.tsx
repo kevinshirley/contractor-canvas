@@ -61,7 +61,14 @@ export const TaskForm = ({
       status: task.status,
       description: task.description || "",
       parentTaskId: task.parentTaskId,
-    } : undefined,
+    } : {
+      name: "",
+      clientId: "",
+      value: "0",
+      status: "Planning",
+      description: "",
+      parentTaskId: "",
+    },
   });
 
   return (
@@ -120,7 +127,7 @@ export const TaskForm = ({
           >
             Cancel
           </Button>
-          <Button type="submit">Update Task</Button>
+          <Button type="submit">Create Task</Button>
         </CardFooter>
       </form>
     </Form>

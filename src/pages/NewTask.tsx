@@ -17,6 +17,7 @@ const NewTask = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [selectedContractors, setSelectedContractors] = useState<string[]>([]);
+  const [netValue, setNetValue] = useState(0);
   const [contractorHours, setContractorHours] = useState<Array<{
     contractorId: string;
     hours: number;
@@ -89,6 +90,10 @@ const NewTask = () => {
     });
   };
 
+  const handleValueChange = (value: number) => {
+    setNetValue(value);
+  };
+
   return (
     <div className="space-y-6">
       <Breadcrumb>
@@ -115,7 +120,7 @@ const NewTask = () => {
           tasks={tasks}
           onSubmit={handleSubmit}
           selectedContractors={selectedContractors}
-          netValue={0}
+          netValue={netValue}
           contractors={contractors}
           contractorHours={contractorHours}
           onAddContractor={addContractor}
@@ -127,6 +132,7 @@ const NewTask = () => {
               )
             );
           }}
+          onValueChange={handleValueChange}
           onUpdateBillingType={(contractorId: string, billingType: 'hourly' | 'fixed') => {
             setContractorHours(
               contractorHours.map((ch) =>
