@@ -21,7 +21,7 @@ export const ProjectHeader = ({ name, status, onEdit }: ProjectHeaderProps) => {
         </div>
         <Button onClick={onEdit} variant="outline">
           <Edit className="mr-2 h-4 w-4" />
-          Edit Project
+          Edit Task
         </Button>
       </div>
     </CardHeader>
