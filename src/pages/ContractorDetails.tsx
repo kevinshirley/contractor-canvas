@@ -37,7 +37,6 @@ import {
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   rate: z.string().min(1, "Rate is required"),
-  skills: z.string().min(2, "Skills must be at least 2 characters"),
 });
 
 const ContractorDetails = () => {
