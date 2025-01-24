@@ -3,6 +3,18 @@ import { useNavigate, useParams, Link } from "react-router-dom";
 import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Trash2 } from "lucide-react";
+import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
@@ -14,6 +26,7 @@ import { ProjectForm } from "@/components/project/ProjectForm";
 import { ProjectHeader } from "@/components/project/display/ProjectHeader";
 import { ProjectDetailsView } from "@/components/project/display/ProjectDetails";
 import { ProjectContractors } from "@/components/project/display/ProjectContractors";
+import { Button } from "@/components/ui/button";
 
 type ContractorHours = {
   contractorId: string;
@@ -50,6 +63,14 @@ const ProjectDetails = () => {
       navigate("/projects");
     }
   }, [id, navigate]);
+
+  const handleDeleteProject = () => {
+    const projects = JSON.parse(localStorage.getItem("projects") || "[]");
+    const updatedProjects = projects.filter((p: any) => p.id.toString() !== id);
+    localStorage.setItem("projects", JSON.stringify(updatedProjects));
+    toast.success("Project deleted successfully");
+    navigate("/projects");
+  };
 
   const calculateNetValue = (projectValue: number, hours: ContractorHours[]) => {
     const totalContractorCost = hours.reduce((acc, curr) => {
@@ -159,19 +180,45 @@ const ProjectDetails = () => {
 
   return (
     <div className="space-y-6">
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink>
-              <Link to="/projects">Projects</Link>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>{isEditing ? 'Edit Project' : 'Project Details'}</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
+      <div className="flex items-center justify-between">
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink>
+                <Link to="/projects">Projects</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>{isEditing ? 'Edit Project' : 'Project Details'}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+
+        {!isEditing && (
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive">
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete Project
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. This will permanently delete the project
+                  and remove all associated data.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDeleteProject}>Delete</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        )}
+      </div>
 
       <Card>
         {isEditing ? (
