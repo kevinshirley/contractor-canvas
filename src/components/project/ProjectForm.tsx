@@ -8,6 +8,7 @@ import { ContractorsList } from "./ContractorsList";
 import { ProjectNameField } from "./form/ProjectNameField";
 import { ClientField } from "./form/ClientField";
 import { ProjectValueFields } from "./form/ProjectValueFields";
+import { ProjectDescriptionField } from "./form/ProjectDescriptionField";
 import { formSchema, FormSchema } from "./types";
 
 type ProjectFormProps = {
@@ -55,6 +56,7 @@ export const ProjectForm = ({
       clientId: project.clientId,
       value: project.value.toString(),
       status: project.status,
+      description: project.description || "",
     } : undefined,
   });
 
@@ -67,6 +69,7 @@ export const ProjectForm = ({
       <form onSubmit={form.handleSubmit(handleSubmit)}>
         <CardContent className="space-y-4">
           <ProjectNameField form={form} />
+          <ProjectDescriptionField form={form} />
           <ClientField form={form} clients={clients} />
           <ContractorsList
             contractors={contractors}

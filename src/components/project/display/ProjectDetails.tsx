@@ -1,4 +1,4 @@
-import { DollarSign, User } from "lucide-react";
+import { DollarSign, User, FileText } from "lucide-react";
 import { CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
@@ -7,6 +7,7 @@ type ProjectDetailsProps = {
   projectValue: number;
   netValue: number;
   totalContractorCost: number;
+  description?: string;
 };
 
 export const ProjectDetailsView = ({
@@ -14,6 +15,7 @@ export const ProjectDetailsView = ({
   projectValue,
   netValue,
   totalContractorCost,
+  description,
 }: ProjectDetailsProps) => {
   return (
     <CardContent className="space-y-6">
@@ -28,6 +30,20 @@ export const ProjectDetailsView = ({
           </div>
           
           <Separator />
+          
+          {description && (
+            <>
+              <div className="flex items-center space-x-4 text-muted-foreground">
+                <FileText className="h-5 w-5" />
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-foreground">Description</p>
+                  <p className="whitespace-pre-wrap">{description}</p>
+                </div>
+              </div>
+              
+              <Separator />
+            </>
+          )}
           
           <div className="flex items-center space-x-4 text-muted-foreground">
             <DollarSign className="h-5 w-5" />
