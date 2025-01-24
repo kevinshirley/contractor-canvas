@@ -68,7 +68,7 @@ const ProjectDetails = () => {
     const projects = JSON.parse(localStorage.getItem("projects") || "[]");
     const updatedProjects = projects.filter((p: any) => p.id.toString() !== id);
     localStorage.setItem("projects", JSON.stringify(updatedProjects));
-    toast.success("Project deleted successfully");
+    toast.success("Task deleted successfully");
     navigate("/projects");
   };
 
@@ -109,7 +109,7 @@ const ProjectDetails = () => {
     );
 
     localStorage.setItem("projects", JSON.stringify(updatedProjects));
-    toast.success("Project updated successfully");
+    toast.success("Task updated successfully");
     setIsEditing(false);
     setProject(updatedProject);
   };
@@ -200,14 +200,14 @@ const ProjectDetails = () => {
             <AlertDialogTrigger asChild>
               <Button variant="destructive">
                 <Trash2 className="h-4 w-4 mr-2" />
-                Delete Project
+                Delete Task
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This action cannot be undone. This will permanently delete the project
+                  This action cannot be undone. This will permanently delete the task
                   and remove all associated data.
                 </AlertDialogDescription>
               </AlertDialogHeader>
