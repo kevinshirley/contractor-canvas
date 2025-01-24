@@ -24,9 +24,10 @@ const NewTask = () => {
     fixedAmount?: number;
   }>>([]);
 
-  // Get clients and contractors from localStorage
+  // Get clients, contractors and tasks from localStorage
   const clients = JSON.parse(localStorage.getItem("clients") || "[]");
   const contractors = JSON.parse(localStorage.getItem("contractors") || "[]");
+  const tasks = JSON.parse(localStorage.getItem("tasks") || "[]");
 
   const handleSubmit = (values: FormSchema) => {
     if (selectedContractors.length === 0) {
@@ -43,6 +44,7 @@ const NewTask = () => {
       ...values,
       contractors: selectedContractors,
       contractorHours: contractorHours,
+      status: "Planning",
     };
 
     const existingTasks = JSON.parse(localStorage.getItem("tasks") || "[]");
@@ -110,6 +112,7 @@ const NewTask = () => {
         <TaskForm
           task={null}
           clients={clients}
+          tasks={tasks}
           onSubmit={handleSubmit}
           selectedContractors={selectedContractors}
           netValue={0}
