@@ -85,6 +85,7 @@ export const TaskForm = ({
             form={form} 
             netValue={netValue}
             onValueChange={onValueChange}
+            isTask={true}
           />
         </CardContent>
         <CardFooter className="space-x-2">
