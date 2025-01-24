@@ -1,6 +1,7 @@
 import { DollarSign, User, FileText } from "lucide-react";
 import { CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Link } from "react-router-dom";
 
 type TaskDetailsProps = {
   client: any;
@@ -8,6 +9,7 @@ type TaskDetailsProps = {
   netValue: number;
   totalContractorCost: number;
   description?: string;
+  parentTask?: { id: string; name: string; } | null;
 };
 
 export const TaskDetailsView = ({
@@ -16,6 +18,7 @@ export const TaskDetailsView = ({
   netValue,
   totalContractorCost,
   description,
+  parentTask,
 }: TaskDetailsProps) => {
   return (
     <CardContent className="space-y-6">
@@ -30,6 +33,22 @@ export const TaskDetailsView = ({
           </div>
           
           <Separator />
+          
+          {parentTask && (
+            <>
+              <div className="flex items-center space-x-4 text-muted-foreground">
+                <FileText className="h-5 w-5" />
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-foreground">Parent Task</p>
+                  <Link to={`/tasks/${parentTask.id}`} className="text-blue-500 hover:underline">
+                    {parentTask.name}
+                  </Link>
+                </div>
+              </div>
+              
+              <Separator />
+            </>
+          )}
           
           {description && (
             <>
