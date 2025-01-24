@@ -93,6 +93,7 @@ export const TaskForm = ({
           />
           <SubTaskList
             subTasks={subTasks}
+            contractors={contractors}
             onAddSubTask={(subTask) => setSubTasks([...subTasks, subTask])}
             onRemoveSubTask={(id) => setSubTasks(subTasks.filter(st => st.id !== id))}
             onUpdateSubTask={(updatedSubTask) => 

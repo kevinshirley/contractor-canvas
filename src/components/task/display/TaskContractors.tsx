@@ -16,10 +16,12 @@ export const TaskContractors = ({
   contractors,
   contractorHours,
 }: TaskContractorsProps) => {
+  if (!selectedContractors.length) return null;
+
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold">Contractors</h3>
-      <div className="grid gap-4">
+      <div className="grid gap-4 md:grid-cols-2">
         {selectedContractors.map((contractorId) => {
           const contractor = contractors.find((c: any) => c.id.toString() === contractorId);
           const hours = contractorHours.find(ch => ch.contractorId === contractorId);
@@ -32,20 +34,29 @@ export const TaskContractors = ({
           return (
             <Card key={contractorId}>
               <CardContent className="p-4">
-                <div className="flex justify-between items-center">
+                <div className="space-y-2">
                   <div>
-                    <p className="font-medium">{contractor.name}</p>
+                    <h4 className="font-medium">{contractor.name}</h4>
                     <p className="text-sm text-muted-foreground">{contractor.specialty}</p>
                   </div>
-                  <div className="text-right">
-                    <p className="font-medium">
+                  <div className="pt-2 border-t">
+                    <p className="text-sm font-medium">
                       {hours.billingType === 'fixed' 
-                        ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(hours.fixedAmount || 0)
-                        : `${hours.hours} hours @ ${contractor.rate}`
+                        ? 'Fixed Amount:'
+                        : 'Rate:'
                       }
+                      <span className="float-right">
+                        {hours.billingType === 'fixed' 
+                          ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(hours.fixedAmount || 0)
+                          : `${hours.hours} hours @ ${contractor.rate}`
+                        }
+                      </span>
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount)}
+                      Total:
+                      <span className="float-right">
+                        {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount)}
+                      </span>
                     </p>
                   </div>
                 </div>

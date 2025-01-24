@@ -9,8 +9,9 @@ export const formSchema = z.object({
   subTasks: z.array(z.object({
     id: z.string(),
     name: z.string(),
-    completed: z.boolean(),
+    completed: boolean(),
     description: z.string().optional(),
+    contractorId: z.string().optional(),
   })).optional(),
 });
 
@@ -21,4 +22,5 @@ export type SubTask = {
   name: string;
   completed: boolean;
   description?: string;
+  contractorId?: string;
 };
