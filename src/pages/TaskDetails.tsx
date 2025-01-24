@@ -184,13 +184,13 @@ const ProjectDetails = () => {
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink>
-                <Link to="/projects">Projects</Link>
+              <BreadcrumbLink asChild>
+                <Link to="/tasks">Tasks</Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage>{isEditing ? 'Edit Project' : 'Project Details'}</BreadcrumbPage>
+              <BreadcrumbPage>{isEditing ? 'Edit Task' : 'Task Details'}</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>

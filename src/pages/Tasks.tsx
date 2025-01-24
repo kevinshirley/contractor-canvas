@@ -4,6 +4,12 @@ import { Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useState, useEffect } from "react";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbList,
+  BreadcrumbPage,
+} from "@/components/ui/breadcrumb";
 
 type ContractorHours = {
   contractorId: string;
@@ -68,7 +74,6 @@ const Tasks = () => {
       setTasks(initialTasks);
     } else {
       const parsedTasks = JSON.parse(storedTasks);
-      // Ensure all values and netValues are numbers
       const validatedTasks = parsedTasks.map((task: Task) => ({
         ...task,
         value: Number(task.value),
@@ -134,13 +139,23 @@ const Tasks = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-2xl font-bold md:text-3xl">Tasks</h1>
-        <Button asChild className="w-full sm:w-auto">
-          <Link to="/tasks/new">
-            <Plus className="mr-2 h-4 w-4" /> New Task
-          </Link>
-        </Button>
+      <div className="flex flex-col gap-4">
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbPage>Tasks</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <h1 className="text-2xl font-bold md:text-3xl">Tasks</h1>
+          <Button asChild className="w-full sm:w-auto">
+            <Link to="/tasks/new">
+              <Plus className="mr-2 h-4 w-4" /> New Task
+            </Link>
+          </Button>
+        </div>
       </div>
 
       <div className="flex flex-col gap-6 md:flex-row md:gap-4 h-[calc(100vh-12rem)] overflow-hidden">
