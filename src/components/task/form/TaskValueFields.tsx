@@ -14,9 +14,10 @@ type TaskValueFieldsProps = {
   form: UseFormReturn<FormSchema>;
   netValue: number;
   onValueChange?: (value: number) => void;
+  isTask?: boolean;
 };
 
-export const TaskValueFields = ({ form, netValue, onValueChange }: TaskValueFieldsProps) => {
+export const TaskValueFields = ({ form, netValue, onValueChange, isTask = false }: TaskValueFieldsProps) => {
   const value = useWatch({
     control: form.control,
     name: "value"
@@ -35,7 +36,7 @@ export const TaskValueFields = ({ form, netValue, onValueChange }: TaskValueFiel
         name="value"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Task Value ($)</FormLabel>
+            <FormLabel>{isTask ? 'Task Value ($)' : 'Project Value ($)'}</FormLabel>
             <FormControl>
               <Input type="number" min="0" step="0.01" {...field} />
             </FormControl>
@@ -45,7 +46,7 @@ export const TaskValueFields = ({ form, netValue, onValueChange }: TaskValueFiel
       />
 
       <div>
-        <FormLabel>Net Task Value</FormLabel>
+        <FormLabel>{isTask ? 'Net Task Value' : 'Net Project Value'}</FormLabel>
         <Input
           value={new Intl.NumberFormat('en-US', {
             style: 'currency',
