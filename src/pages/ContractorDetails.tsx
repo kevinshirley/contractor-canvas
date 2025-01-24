@@ -22,7 +22,7 @@ import { Badge } from "@/components/ui/badge";
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   rate: z.string().min(1, "Rate is required"),
-  specialty: z.string().min(2, "Specialty must be at least 2 characters"),
+  skills: z.string().min(2, "Skills must be at least 2 characters"),
 });
 
 const ContractorDetails = () => {
@@ -37,18 +37,22 @@ const ContractorDetails = () => {
     defaultValues: {
       name: "",
       rate: "",
-      specialty: "",
+      skills: "",
     },
   });
 
   useEffect(() => {
     const contractors = JSON.parse(localStorage.getItem("contractors") || "[]");
-    // Convert both IDs to strings for comparison
     const foundContractor = contractors.find((c: any) => c.id.toString() === id?.toString());
     
     if (foundContractor) {
       setContractor(foundContractor);
-      form.reset(foundContractor);
+      form.reset({
+        ...foundContractor,
+        skills: Array.isArray(foundContractor.skills) 
+          ? foundContractor.skills.join(', ')
+          : foundContractor.skills
+      });
     } else {
       navigate("/contractors");
       toast({
@@ -61,11 +65,17 @@ const ContractorDetails = () => {
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     const contractors = JSON.parse(localStorage.getItem("contractors") || "[]");
     const updatedContractors = contractors.map((contractor: any) =>
-      contractor.id.toString() === id?.toString() ? { ...contractor, ...values } : contractor
+      contractor.id.toString() === id?.toString() 
+        ? { 
+            ...contractor, 
+            ...values,
+            skills: values.skills.split(',').map((skill: string) => skill.trim())
+          } 
+        : contractor
     );
     
     localStorage.setItem("contractors", JSON.stringify(updatedContractors));
-
+    
     toast({
       title: "Success",
       description: "Contractor has been updated successfully",
@@ -73,7 +83,11 @@ const ContractorDetails = () => {
 
     setIsEditing(false);
     // Update the contractor state to reflect changes
-    setContractor({ ...contractor, ...values });
+    setContractor({ 
+      ...contractor, 
+      ...values,
+      skills: values.skills.split(',').map((skill: string) => skill.trim())
+    });
   };
 
   const renderDisplayView = () => {
@@ -85,9 +99,20 @@ const ContractorDetails = () => {
           <div className="flex justify-between items-center">
             <div className="space-y-1">
               <CardTitle className="text-2xl font-bold">{contractor.name}</CardTitle>
-              <Badge variant="secondary" className="text-sm">
-                {contractor.specialty}
-              </Badge>
+              <div className="flex flex-wrap gap-2">
+                {Array.isArray(contractor.skills) 
+                  ? contractor.skills.map((skill: string, index: number) => (
+                      <Badge key={index} variant="secondary" className="text-sm">
+                        {skill}
+                      </Badge>
+                    ))
+                  : (
+                    <Badge variant="secondary" className="text-sm">
+                      {contractor.skills}
+                    </Badge>
+                  )
+                }
+              </div>
             </div>
             <Button onClick={() => setIsEditing(true)} variant="outline">
               <Edit className="mr-2 h-4 w-4" />
@@ -110,8 +135,21 @@ const ContractorDetails = () => {
             <div className="flex items-center space-x-4 text-muted-foreground">
               <Briefcase className="h-5 w-5" />
               <div className="space-y-1">
-                <p className="text-sm font-medium text-foreground">Specialty</p>
-                <p>{contractor.specialty}</p>
+                <p className="text-sm font-medium text-foreground">Skills</p>
+                <div className="flex flex-wrap gap-2">
+                  {Array.isArray(contractor.skills) 
+                    ? contractor.skills.map((skill: string, index: number) => (
+                        <Badge key={index} variant="secondary" className="text-sm">
+                          {skill}
+                        </Badge>
+                      ))
+                    : (
+                      <Badge variant="secondary" className="text-sm">
+                        {contractor.skills}
+                      </Badge>
+                    )
+                  }
+                </div>
               </div>
             </div>
           </div>
@@ -155,12 +193,12 @@ const ContractorDetails = () => {
 
             <FormField
               control={form.control}
-              name="specialty"
+              name="skills"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Specialty</FormLabel>
+                  <FormLabel>Skills (comma-separated)</FormLabel>
                   <FormControl>
-                    <Input placeholder="Specialty" {...field} />
+                    <Input placeholder="Frontend Development, React, TypeScript" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

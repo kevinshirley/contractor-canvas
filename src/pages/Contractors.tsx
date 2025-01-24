@@ -10,6 +10,7 @@ import {
 import { UserPlus, User } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { Badge } from "@/components/ui/badge";
 
 interface Contractor {
   id: number;
@@ -17,7 +18,7 @@ interface Contractor {
   firstName?: string;
   lastName?: string;
   email: string;
-  specialty: string;
+  skills: string[];
   rate: string;
 }
 
@@ -26,7 +27,6 @@ const Contractors = () => {
   const [contractors, setContractors] = useState<Contractor[]>([]);
 
   useEffect(() => {
-    // Load contractors from localStorage on component mount
     const savedContractors = localStorage.getItem('contractors');
     if (savedContractors) {
       setContractors(JSON.parse(savedContractors));
@@ -51,7 +51,7 @@ const Contractors = () => {
             <TableRow>
               <TableHead>Name</TableHead>
               <TableHead>Email</TableHead>
-              <TableHead>Specialty</TableHead>
+              <TableHead>Skills</TableHead>
               <TableHead>Rate</TableHead>
             </TableRow>
           </TableHeader>
@@ -74,7 +74,22 @@ const Contractors = () => {
                     {contractor.name}
                   </TableCell>
                   <TableCell>{contractor.email}</TableCell>
-                  <TableCell>{contractor.specialty}</TableCell>
+                  <TableCell>
+                    <div className="flex flex-wrap gap-2">
+                      {Array.isArray(contractor.skills) 
+                        ? contractor.skills.map((skill, index) => (
+                            <Badge key={index} variant="secondary" className="text-sm">
+                              {skill}
+                            </Badge>
+                          ))
+                        : (
+                          <Badge variant="secondary" className="text-sm">
+                            {contractor.skills}
+                          </Badge>
+                        )
+                      }
+                    </div>
+                  </TableCell>
                   <TableCell>{contractor.rate}</TableCell>
                 </TableRow>
               ))

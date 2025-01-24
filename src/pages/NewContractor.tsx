@@ -18,7 +18,7 @@ const formSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
   email: z.string().email("Invalid email address"),
-  specialty: z.string().min(1, "Specialty is required"),
+  skills: z.string().min(1, "At least one skill is required"),
   currency: z.string().min(1, "Currency is required"),
   rate: z.string().refine(
     (value) => {
@@ -41,28 +41,23 @@ const NewContractor = () => {
       firstName: "",
       lastName: "",
       email: "",
-      specialty: "",
+      skills: "",
       currency: "USD",
       rate: "",
     },
   });
 
   const onSubmit = (data: ContractorFormValues) => {
-    // Format the rate to include the currency symbol and combine first and last name
     const formattedData = {
       ...data,
-      name: `${data.firstName} ${data.lastName}`, // Add combined name for compatibility
+      name: `${data.firstName} ${data.lastName}`,
+      skills: data.skills.split(',').map(skill => skill.trim()),
       rate: `${data.currency === 'USD' ? '$' : data.currency}${parseFloat(data.rate).toFixed(2)}`,
-      id: Date.now(), // Use timestamp as a simple unique ID
+      id: Date.now(),
     };
 
-    // Get existing contractors
     const existingContractors = JSON.parse(localStorage.getItem('contractors') || '[]');
-    
-    // Add new contractor
     const updatedContractors = [...existingContractors, formattedData];
-    
-    // Save to localStorage
     localStorage.setItem('contractors', JSON.stringify(updatedContractors));
     
     toast.success("Contractor created successfully");
@@ -124,12 +119,12 @@ const NewContractor = () => {
 
             <FormField
               control={form.control}
-              name="specialty"
+              name="skills"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Specialty</FormLabel>
+                  <FormLabel>Skills (comma-separated)</FormLabel>
                   <FormControl>
-                    <Input placeholder="Frontend Development" {...field} />
+                    <Input placeholder="Frontend Development, React, TypeScript" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
