@@ -13,12 +13,21 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect, useState } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { X } from "lucide-react";
 
 const formSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
   email: z.string().email("Invalid email address"),
-  skills: z.string().min(1, "At least one skill is required"),
   currency: z.string().min(1, "Currency is required"),
   rate: z.string().refine(
     (value) => {
@@ -35,23 +44,37 @@ type ContractorFormValues = z.infer<typeof formSchema>;
 
 const NewContractor = () => {
   const navigate = useNavigate();
+  const [availableSkills, setAvailableSkills] = useState<string[]>([]);
+  const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
+
+  useEffect(() => {
+    const savedSkills = localStorage.getItem("availableSkills");
+    if (savedSkills) {
+      setAvailableSkills(JSON.parse(savedSkills));
+    }
+  }, []);
+
   const form = useForm<ContractorFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       firstName: "",
       lastName: "",
       email: "",
-      skills: "",
       currency: "USD",
       rate: "",
     },
   });
 
   const onSubmit = (data: ContractorFormValues) => {
+    if (selectedSkills.length === 0) {
+      toast.error("Please select at least one skill");
+      return;
+    }
+
     const formattedData = {
       ...data,
       name: `${data.firstName} ${data.lastName}`,
-      skills: data.skills.split(',').map(skill => skill.trim()),
+      skills: selectedSkills,
       rate: `${data.currency === 'USD' ? '$' : data.currency}${parseFloat(data.rate).toFixed(2)}`,
       id: Date.now(),
     };
@@ -62,6 +85,16 @@ const NewContractor = () => {
     
     toast.success("Contractor created successfully");
     navigate("/contractors");
+  };
+
+  const handleSkillSelect = (skill: string) => {
+    if (!selectedSkills.includes(skill)) {
+      setSelectedSkills([...selectedSkills, skill]);
+    }
+  };
+
+  const handleRemoveSkill = (skill: string) => {
+    setSelectedSkills(selectedSkills.filter(s => s !== skill));
   };
 
   return (
@@ -117,19 +150,41 @@ const NewContractor = () => {
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="skills"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Skills (comma-separated)</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Frontend Development, React, TypeScript" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <FormItem>
+              <FormLabel>Skills</FormLabel>
+              <Select onValueChange={handleSkillSelect}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select skills" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableSkills
+                    .filter(skill => !selectedSkills.includes(skill))
+                    .map((skill) => (
+                      <SelectItem key={skill} value={skill}>
+                        {skill}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {selectedSkills.map((skill) => (
+                  <Badge
+                    key={skill}
+                    variant="secondary"
+                    className="flex items-center gap-1"
+                  >
+                    {skill}
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveSkill(skill)}
+                      className="ml-1 hover:text-destructive"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                ))}
+              </div>
+            </FormItem>
 
             <div className="grid grid-cols-2 gap-4">
               <FormField

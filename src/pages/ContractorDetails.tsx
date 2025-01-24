@@ -39,27 +39,31 @@ const ContractorDetails = () => {
   const { id } = useParams();
   const [isEditing, setIsEditing] = useState(false);
   const [contractor, setContractor] = useState<any>(null);
+  const [availableSkills, setAvailableSkills] = useState<string[]>([]);
+  const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       rate: "",
-      skills: "",
     },
   });
 
   useEffect(() => {
+    const savedSkills = localStorage.getItem("availableSkills");
+    if (savedSkills) {
+      setAvailableSkills(JSON.parse(savedSkills));
+    }
+
     const contractors = JSON.parse(localStorage.getItem("contractors") || "[]");
     const foundContractor = contractors.find((c: any) => c.id.toString() === id?.toString());
     
     if (foundContractor) {
       setContractor(foundContractor);
+      setSelectedSkills(foundContractor.skills || []);
       form.reset({
         ...foundContractor,
-        skills: Array.isArray(foundContractor.skills) 
-          ? foundContractor.skills.join(', ')
-          : foundContractor.skills
       });
     } else {
       navigate("/contractors");
@@ -70,14 +74,33 @@ const ContractorDetails = () => {
     }
   }, [id, form, navigate, toast]);
 
+  const handleSkillSelect = (skill: string) => {
+    if (!selectedSkills.includes(skill)) {
+      setSelectedSkills([...selectedSkills, skill]);
+    }
+  };
+
+  const handleRemoveSkill = (skill: string) => {
+    setSelectedSkills(selectedSkills.filter(s => s !== skill));
+  };
+
   const onSubmit = (values: z.infer<typeof formSchema>) => {
+    if (selectedSkills.length === 0) {
+      toast({
+        title: "Error",
+        description: "Please select at least one skill",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const contractors = JSON.parse(localStorage.getItem("contractors") || "[]");
     const updatedContractors = contractors.map((contractor: any) =>
       contractor.id.toString() === id?.toString() 
         ? { 
             ...contractor, 
             ...values,
-            skills: values.skills.split(',').map((skill: string) => skill.trim())
+            skills: selectedSkills,
           } 
         : contractor
     );
@@ -90,11 +113,10 @@ const ContractorDetails = () => {
     });
 
     setIsEditing(false);
-    // Update the contractor state to reflect changes
     setContractor({ 
       ...contractor, 
       ...values,
-      skills: values.skills.split(',').map((skill: string) => skill.trim())
+      skills: selectedSkills,
     });
   };
 
@@ -215,19 +237,42 @@ const ContractorDetails = () => {
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="skills"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Skills (comma-separated)</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Frontend Development, React, TypeScript" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <FormItem>
+              <FormLabel>Skills</FormLabel>
+              <Select onValueChange={handleSkillSelect}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select skills" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableSkills
+                    .filter(skill => !selectedSkills.includes(skill))
+                    .map((skill) => (
+                      <SelectItem key={skill} value={skill}>
+                        {skill}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {selectedSkills.map((skill) => (
+                  <Badge
+                    key={skill}
+                    variant="secondary"
+                    className="flex items-center gap-1"
+                  >
+                    {skill}
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveSkill(skill)}
+                      className="ml-1 hover:text-destructive"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                ))}
+              </div>
+            </FormItem>
+
             <div className="flex justify-end gap-4">
               <Button variant="outline" onClick={() => setIsEditing(false)}>
                 Cancel
