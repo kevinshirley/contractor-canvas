@@ -11,7 +11,6 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { TaskForm } from "@/components/task/TaskForm";
-import { FormSchema } from "@/components/task/types";
 
 const NewTask = () => {
   const navigate = useNavigate();
@@ -30,16 +29,7 @@ const NewTask = () => {
   const contractors = JSON.parse(localStorage.getItem("contractors") || "[]");
   const tasks = JSON.parse(localStorage.getItem("tasks") || "[]");
 
-  const handleSubmit = (values: FormSchema) => {
-    if (selectedContractors.length === 0) {
-      toast({
-        title: "Warning",
-        description: "Please add at least one contractor to the task",
-        variant: "destructive",
-      });
-      return;
-    }
-
+  const handleSubmit = (values: any) => {
     const newTask = {
       id: Date.now(),
       ...values,
