@@ -176,6 +176,7 @@ const TaskDetails = () => {
             />
             <SubTasksView
               subTasks={task.subTasks || []}
+              contractors={contractors}
               onUpdateSubTask={(updatedSubTask) => {
                 const updatedSubTasks = (task.subTasks || []).map((st: any) =>
                   st.id === updatedSubTask.id ? updatedSubTask : st
