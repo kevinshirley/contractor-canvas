@@ -36,7 +36,7 @@ export const TaskValueFields = ({ form, netValue, onValueChange, isTask = false 
         name="value"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>{isTask ? 'Task Value ($)' : 'Project Value ($)'}</FormLabel>
+            <FormLabel>Task Value ($)</FormLabel>
             <FormControl>
               <Input type="number" min="0" step="0.01" {...field} />
             </FormControl>
@@ -46,7 +46,7 @@ export const TaskValueFields = ({ form, netValue, onValueChange, isTask = false 
       />
 
       <div>
-        <FormLabel>{isTask ? 'Net Task Value' : 'Net Project Value'}</FormLabel>
+        <FormLabel>Net Task Value</FormLabel>
         <Input
           value={new Intl.NumberFormat('en-US', {
             style: 'currency',
