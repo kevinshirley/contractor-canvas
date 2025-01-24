@@ -48,7 +48,7 @@ export const ProjectDetailsView = ({
           <div className="flex items-center space-x-4 text-muted-foreground">
             <DollarSign className="h-5 w-5" />
             <div className="space-y-1">
-              <p className="text-sm font-medium text-foreground">Project Value</p>
+              <p className="text-sm font-medium text-foreground">Task Value</p>
               <p>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(projectValue)}</p>
             </div>
           </div>
