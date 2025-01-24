@@ -22,7 +22,7 @@ const Sidebar = () => {
 
   const links = [
     { name: "Dashboard", path: "/", icon: LayoutDashboard },
-    { name: "Projects", path: "/projects", icon: Briefcase },
+    { name: "Tasks", path: "/tasks", icon: Briefcase },
     { name: "Clients", path: "/clients", icon: Users },
     { name: "Contractors", path: "/contractors", icon: User },
     { name: "Payments", path: "/payments", icon: CreditCard },
