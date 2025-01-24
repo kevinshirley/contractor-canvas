@@ -14,7 +14,7 @@ import { useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 import { z } from "zod";
 import { useEffect, useState } from "react";
-import { Edit, User, DollarSign, Briefcase } from "lucide-react";
+import { Edit, DollarSign, Briefcase } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
@@ -43,7 +43,8 @@ const ContractorDetails = () => {
 
   useEffect(() => {
     const contractors = JSON.parse(localStorage.getItem("contractors") || "[]");
-    const foundContractor = contractors.find((c: any) => c.id === id);
+    // Convert both IDs to strings for comparison
+    const foundContractor = contractors.find((c: any) => c.id.toString() === id?.toString());
     
     if (foundContractor) {
       setContractor(foundContractor);
@@ -60,7 +61,7 @@ const ContractorDetails = () => {
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     const contractors = JSON.parse(localStorage.getItem("contractors") || "[]");
     const updatedContractors = contractors.map((contractor: any) =>
-      contractor.id === id ? { ...contractor, ...values } : contractor
+      contractor.id.toString() === id?.toString() ? { ...contractor, ...values } : contractor
     );
     
     localStorage.setItem("contractors", JSON.stringify(updatedContractors));
@@ -71,6 +72,8 @@ const ContractorDetails = () => {
     });
 
     setIsEditing(false);
+    // Update the contractor state to reflect changes
+    setContractor({ ...contractor, ...values });
   };
 
   const renderDisplayView = () => {
