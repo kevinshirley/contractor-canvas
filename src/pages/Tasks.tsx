@@ -10,6 +10,7 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
+import { Badge } from "@/components/ui/badge";
 
 type ContractorHours = {
   contractorId: string;
@@ -25,40 +26,8 @@ type Task = {
   contractors: string[];
   contractorHours?: ContractorHours[];
   netValue: number;
+  parentTaskId?: string;
 };
-
-const initialTasks: Task[] = [
-  {
-    id: 1,
-    name: "Website Redesign",
-    clientId: "1",
-    value: 15000,
-    status: "In Progress",
-    contractors: [],
-    contractorHours: [],
-    netValue: 15000,
-  },
-  {
-    id: 2,
-    name: "Mobile App Development",
-    clientId: "2",
-    value: 25000,
-    status: "Planning",
-    contractors: [],
-    contractorHours: [],
-    netValue: 25000,
-  },
-  {
-    id: 3,
-    name: "Marketing Campaign",
-    clientId: "3",
-    value: 10000,
-    status: "Completed",
-    contractors: [],
-    contractorHours: [],
-    netValue: 10000,
-  },
-];
 
 const statusColumns = ["Planning", "In Progress", "Completed"];
 
@@ -69,10 +38,7 @@ const Tasks = () => {
 
   useEffect(() => {
     const storedTasks = localStorage.getItem("tasks");
-    if (!storedTasks) {
-      localStorage.setItem("tasks", JSON.stringify(initialTasks));
-      setTasks(initialTasks);
-    } else {
+    if (storedTasks) {
       const parsedTasks = JSON.parse(storedTasks);
       const validatedTasks = parsedTasks.map((task: Task) => ({
         ...task,
@@ -106,6 +72,12 @@ const Tasks = () => {
       })
       .filter(Boolean)
       .join(", ") || "No contractors assigned";
+  };
+
+  const getParentTaskName = (parentTaskId?: string) => {
+    if (!parentTaskId) return null;
+    const parentTask = tasks.find(t => t.id.toString() === parentTaskId);
+    return parentTask?.name;
   };
 
   const formatCurrency = (value: number) => {
@@ -176,27 +148,38 @@ const Tasks = () => {
 
             <ScrollArea className="flex-1">
               <div className="space-y-4 p-2">
-                {getTasksByStatus(status).map((task) => (
-                  <div
-                    key={task.id}
-                    draggable
-                    onDragStart={(e) => handleDragStart(e, task.id)}
-                  >
-                    <Link to={`/tasks/${task.id}`}>
-                      <Card className="transition-shadow hover:shadow-md">
-                        <CardContent className="p-4">
-                          <h3 className="font-semibold mb-2">{task.name}</h3>
-                          <div className="space-y-1 text-sm text-muted-foreground">
-                            <p>Client: {getClientName(task.clientId)}</p>
-                            <p>Value: {formatCurrency(task.value)}</p>
-                            <p>Net Value: {formatCurrency(task.netValue || task.value)}</p>
-                            <p>Team: {getContractorNames(task.contractors)}</p>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </Link>
-                  </div>
-                ))}
+                {getTasksByStatus(status).map((task) => {
+                  const parentTaskName = getParentTaskName(task.parentTaskId);
+                  
+                  return (
+                    <div
+                      key={task.id}
+                      draggable
+                      onDragStart={(e) => handleDragStart(e, task.id)}
+                    >
+                      <Link to={`/tasks/${task.id}`}>
+                        <Card className="transition-shadow hover:shadow-md">
+                          <CardContent className="p-4">
+                            <div className="flex items-start justify-between gap-2">
+                              <h3 className="font-semibold mb-2">{task.name}</h3>
+                              {parentTaskName && (
+                                <Badge variant="secondary" className="text-xs">
+                                  Subtask of: {parentTaskName}
+                                </Badge>
+                              )}
+                            </div>
+                            <div className="space-y-1 text-sm text-muted-foreground">
+                              <p>Client: {getClientName(task.clientId)}</p>
+                              <p>Value: {formatCurrency(task.value)}</p>
+                              <p>Net Value: {formatCurrency(task.netValue || task.value)}</p>
+                              <p>Team: {getContractorNames(task.contractors)}</p>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </Link>
+                    </div>
+                  );
+                })}
               </div>
             </ScrollArea>
           </div>

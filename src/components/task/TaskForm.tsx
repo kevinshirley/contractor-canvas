@@ -9,13 +9,13 @@ import { TaskNameField } from "./form/TaskNameField";
 import { ClientField } from "@/components/project/form/ClientField";
 import { TaskValueFields } from "./form/TaskValueFields";
 import { TaskDescriptionField } from "./form/TaskDescriptionField";
-import { formSchema, FormSchema, SubTask } from "./types";
-import { SubTaskList } from "./SubTaskList";
-import { useState } from "react";
+import { formSchema, FormSchema } from "./types";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 type TaskFormProps = {
   task: any;
   clients: any[];
+  tasks?: any[];
   onSubmit: (values: FormSchema) => void;
   selectedContractors: string[];
   netValue: number;
@@ -37,6 +37,7 @@ type TaskFormProps = {
 export const TaskForm = ({
   task,
   clients,
+  tasks = [],
   onSubmit,
   selectedContractors,
   netValue,
@@ -50,7 +51,6 @@ export const TaskForm = ({
   onUpdateFixedAmount,
 }: TaskFormProps) => {
   const navigate = useNavigate();
-  const [subTasks, setSubTasks] = useState<SubTask[]>(task?.subTasks || []);
   
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
@@ -60,21 +60,41 @@ export const TaskForm = ({
       value: task.value.toString(),
       status: task.status,
       description: task.description || "",
-      subTasks: task.subTasks || [],
+      parentTaskId: task.parentTaskId,
     } : undefined,
   });
 
-  const handleSubmit = (values: FormSchema) => {
-    onSubmit({ ...values, subTasks });
-  };
-
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)}>
+      <form onSubmit={form.handleSubmit(onSubmit)}>
         <CardContent className="space-y-4">
           <TaskNameField form={form} />
           <TaskDescriptionField form={form} />
           <ClientField form={form} clients={clients} />
+          
+          {tasks.length > 0 && (
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Parent Task (Optional)</label>
+              <Select
+                value={form.watch("parentTaskId")}
+                onValueChange={(value) => form.setValue("parentTaskId", value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select parent task" />
+                </SelectTrigger>
+                <SelectContent>
+                  {tasks
+                    .filter(t => t.id !== task?.id) // Prevent selecting self as parent
+                    .map((t: any) => (
+                      <SelectItem key={t.id} value={t.id.toString()}>
+                        {t.name}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
           <ContractorsList
             contractors={contractors}
             selectedContractors={selectedContractors}
@@ -90,17 +110,6 @@ export const TaskForm = ({
             netValue={netValue}
             onValueChange={onValueChange}
             isTask={true}
-          />
-          <SubTaskList
-            subTasks={subTasks}
-            contractors={contractors}
-            onAddSubTask={(subTask) => setSubTasks([...subTasks, subTask])}
-            onRemoveSubTask={(id) => setSubTasks(subTasks.filter(st => st.id !== id))}
-            onUpdateSubTask={(updatedSubTask) => 
-              setSubTasks(subTasks.map(st => 
-                st.id === updatedSubTask.id ? updatedSubTask : st
-              ))
-            }
           />
         </CardContent>
         <CardFooter className="space-x-2">
