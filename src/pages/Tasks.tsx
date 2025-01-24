@@ -10,7 +10,7 @@ type ContractorHours = {
   hours: number;
 }
 
-type Project = {
+type Task = {
   id: number;
   name: string;
   clientId: string;
@@ -21,7 +21,7 @@ type Project = {
   netValue: number;
 };
 
-const initialProjects: Project[] = [
+const initialTasks: Task[] = [
   {
     id: 1,
     name: "Website Redesign",
@@ -56,35 +56,35 @@ const initialProjects: Project[] = [
 
 const statusColumns = ["Planning", "In Progress", "Completed"];
 
-const Projects = () => {
-  const [projects, setProjects] = useState<Project[]>([]);
+const Tasks = () => {
+  const [tasks, setTasks] = useState<Task[]>([]);
   const clients = JSON.parse(localStorage.getItem("clients") || "[]");
   const contractors = JSON.parse(localStorage.getItem("contractors") || "[]");
 
   useEffect(() => {
-    const storedProjects = localStorage.getItem("projects");
-    if (!storedProjects) {
-      localStorage.setItem("projects", JSON.stringify(initialProjects));
-      setProjects(initialProjects);
+    const storedTasks = localStorage.getItem("tasks");
+    if (!storedTasks) {
+      localStorage.setItem("tasks", JSON.stringify(initialTasks));
+      setTasks(initialTasks);
     } else {
-      const parsedProjects = JSON.parse(storedProjects);
+      const parsedTasks = JSON.parse(storedTasks);
       // Ensure all values and netValues are numbers
-      const validatedProjects = parsedProjects.map((project: Project) => ({
-        ...project,
-        value: Number(project.value),
-        netValue: Number(project.netValue || project.value)
+      const validatedTasks = parsedTasks.map((task: Task) => ({
+        ...task,
+        value: Number(task.value),
+        netValue: Number(task.netValue || task.value)
       }));
-      setProjects(validatedProjects);
+      setTasks(validatedTasks);
     }
   }, []);
 
-  const getProjectsByStatus = (status: string) => {
-    return projects.filter((project) => project.status === status);
+  const getTasksByStatus = (status: string) => {
+    return tasks.filter((task) => task.status === status);
   };
 
   const calculateColumnNetValue = (status: string) => {
-    return getProjectsByStatus(status).reduce((sum, project) => {
-      return sum + Number(project.netValue || project.value);
+    return getTasksByStatus(status).reduce((sum, task) => {
+      return sum + Number(task.netValue || task.value);
     }, 0);
   };
 
@@ -110,8 +110,8 @@ const Projects = () => {
     }).format(value);
   };
 
-  const handleDragStart = (e: React.DragEvent, projectId: number) => {
-    e.dataTransfer.setData("projectId", projectId.toString());
+  const handleDragStart = (e: React.DragEvent, taskId: number) => {
+    e.dataTransfer.setData("taskId", taskId.toString());
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -120,25 +120,25 @@ const Projects = () => {
 
   const handleDrop = (e: React.DragEvent, newStatus: string) => {
     e.preventDefault();
-    const projectId = parseInt(e.dataTransfer.getData("projectId"));
+    const taskId = parseInt(e.dataTransfer.getData("taskId"));
     
-    const updatedProjects = projects.map((project) =>
-      project.id === projectId
-        ? { ...project, status: newStatus }
-        : project
+    const updatedTasks = tasks.map((task) =>
+      task.id === taskId
+        ? { ...task, status: newStatus }
+        : task
     );
 
-    setProjects(updatedProjects);
-    localStorage.setItem("projects", JSON.stringify(updatedProjects));
+    setTasks(updatedTasks);
+    localStorage.setItem("tasks", JSON.stringify(updatedTasks));
   };
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-2xl font-bold md:text-3xl">Projects</h1>
+        <h1 className="text-2xl font-bold md:text-3xl">Tasks</h1>
         <Button asChild className="w-full sm:w-auto">
-          <Link to="/projects/new">
-            <Plus className="mr-2 h-4 w-4" /> New Project
+          <Link to="/tasks/new">
+            <Plus className="mr-2 h-4 w-4" /> New Task
           </Link>
         </Button>
       </div>
@@ -154,28 +154,28 @@ const Projects = () => {
             <div className="mb-3">
               <h2 className="font-semibold text-lg px-2">{status}</h2>
               <div className="text-sm text-muted-foreground px-2 space-y-1">
-                <p>{getProjectsByStatus(status).length} projects</p>
+                <p>{getTasksByStatus(status).length} tasks</p>
                 <p>Total Net Value: {formatCurrency(calculateColumnNetValue(status))}</p>
               </div>
             </div>
 
             <ScrollArea className="flex-1">
               <div className="space-y-4 p-2">
-                {getProjectsByStatus(status).map((project) => (
+                {getTasksByStatus(status).map((task) => (
                   <div
-                    key={project.id}
+                    key={task.id}
                     draggable
-                    onDragStart={(e) => handleDragStart(e, project.id)}
+                    onDragStart={(e) => handleDragStart(e, task.id)}
                   >
-                    <Link to={`/projects/${project.id}`}>
+                    <Link to={`/tasks/${task.id}`}>
                       <Card className="transition-shadow hover:shadow-md">
                         <CardContent className="p-4">
-                          <h3 className="font-semibold mb-2">{project.name}</h3>
+                          <h3 className="font-semibold mb-2">{task.name}</h3>
                           <div className="space-y-1 text-sm text-muted-foreground">
-                            <p>Client: {getClientName(project.clientId)}</p>
-                            <p>Value: {formatCurrency(project.value)}</p>
-                            <p>Net Value: {formatCurrency(project.netValue || project.value)}</p>
-                            <p>Team: {getContractorNames(project.contractors)}</p>
+                            <p>Client: {getClientName(task.clientId)}</p>
+                            <p>Value: {formatCurrency(task.value)}</p>
+                            <p>Net Value: {formatCurrency(task.netValue || task.value)}</p>
+                            <p>Team: {getContractorNames(task.contractors)}</p>
                           </div>
                         </CardContent>
                       </Card>
@@ -191,4 +191,4 @@ const Projects = () => {
   );
 };
 
-export default Projects;
+export default Tasks;
