@@ -45,6 +45,12 @@ const NewProject = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [selectedContractors, setSelectedContractors] = useState<string[]>([]);
+  const [contractorHours, setContractorHours] = useState<Array<{
+    contractorId: string;
+    hours: number;
+    billingType: 'hourly' | 'fixed';
+    fixedAmount?: number;
+  }>>([]);
 
   // Get clients and contractors from localStorage
   const clients = JSON.parse(localStorage.getItem("clients") || "[]");
@@ -74,6 +80,7 @@ const NewProject = () => {
       id: Date.now(),
       ...values,
       contractors: selectedContractors,
+      contractorHours: contractorHours, // Add contractorHours to the project data
     };
 
     const existingProjects = JSON.parse(localStorage.getItem("projects") || "[]");
@@ -93,6 +100,16 @@ const NewProject = () => {
   const addContractor = (contractorId: string) => {
     if (!selectedContractors.includes(contractorId)) {
       setSelectedContractors([...selectedContractors, contractorId]);
+      // Initialize contractor hours when adding a contractor
+      setContractorHours([
+        ...contractorHours,
+        {
+          contractorId,
+          hours: 0,
+          billingType: 'hourly',
+          fixedAmount: 0
+        }
+      ]);
       toast({
         title: "Success",
         description: "Contractor added to project",
@@ -102,6 +119,8 @@ const NewProject = () => {
 
   const removeContractor = (contractorId: string) => {
     setSelectedContractors(selectedContractors.filter(id => id !== contractorId));
+    // Remove contractor hours when removing a contractor
+    setContractorHours(contractorHours.filter(ch => ch.contractorId !== contractorId));
     toast({
       title: "Success",
       description: "Contractor removed from project",
@@ -114,7 +133,7 @@ const NewProject = () => {
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink>
-              <Link to="/projects">Projects</Link>
+              <Link to="/projects">Projects</BreadcrumbLink>
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
