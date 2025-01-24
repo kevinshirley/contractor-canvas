@@ -130,24 +130,28 @@ const Tasks = () => {
         </div>
       </div>
 
-      <div className="flex flex-col gap-6 md:flex-row md:gap-4 h-[calc(100vh-12rem)] overflow-hidden">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-[calc(100vh-12rem)]">
         {statusColumns.map((status) => (
           <div
             key={status}
-            className="flex-1 flex flex-col min-w-[280px]"
+            className="flex flex-col bg-card rounded-lg border shadow-sm"
             onDragOver={handleDragOver}
             onDrop={(e) => handleDrop(e, status)}
           >
-            <div className="mb-3">
-              <h2 className="font-semibold text-lg px-2">{status}</h2>
-              <div className="text-sm text-muted-foreground px-2 space-y-1">
-                <p>{getTasksByStatus(status).length} tasks</p>
-                <p>Total Net Value: {formatCurrency(calculateColumnNetValue(status))}</p>
+            <div className="p-4 border-b bg-muted/50">
+              <h2 className="font-semibold text-lg">{status}</h2>
+              <div className="text-sm text-muted-foreground space-y-1 mt-1">
+                <div className="flex items-center justify-between">
+                  <span>Tasks: {getTasksByStatus(status).length}</span>
+                  <Badge variant="secondary">
+                    {formatCurrency(calculateColumnNetValue(status))}
+                  </Badge>
+                </div>
               </div>
             </div>
 
-            <ScrollArea className="flex-1">
-              <div className="space-y-4 p-2">
+            <ScrollArea className="flex-1 p-4">
+              <div className="space-y-4">
                 {getTasksByStatus(status).map((task) => {
                   const parentTaskName = getParentTaskName(task.parentTaskId);
                   
@@ -156,23 +160,45 @@ const Tasks = () => {
                       key={task.id}
                       draggable
                       onDragStart={(e) => handleDragStart(e, task.id)}
+                      className="group"
                     >
                       <Link to={`/tasks/${task.id}`}>
-                        <Card className="transition-shadow hover:shadow-md">
+                        <Card className="transition-all duration-200 hover:shadow-md group-hover:border-primary/20 group-active:scale-98">
                           <CardContent className="p-4">
                             <div className="flex items-start justify-between gap-2">
-                              <h3 className="font-semibold mb-2">{task.name}</h3>
+                              <h3 className="font-semibold mb-2 group-hover:text-primary transition-colors">
+                                {task.name}
+                              </h3>
                               {parentTaskName && (
-                                <Badge variant="secondary" className="text-xs">
+                                <Badge variant="outline" className="text-xs">
                                   Subtask of: {parentTaskName}
                                 </Badge>
                               )}
                             </div>
-                            <div className="space-y-1 text-sm text-muted-foreground">
-                              <p>Client: {getClientName(task.clientId)}</p>
-                              <p>Value: {formatCurrency(task.value)}</p>
-                              <p>Net Value: {formatCurrency(task.netValue || task.value)}</p>
-                              <p>Team: {getContractorNames(task.contractors)}</p>
+                            <div className="space-y-2 text-sm text-muted-foreground">
+                              <p className="flex justify-between">
+                                <span>Client:</span>
+                                <span className="font-medium text-foreground">
+                                  {getClientName(task.clientId)}
+                                </span>
+                              </p>
+                              <p className="flex justify-between">
+                                <span>Value:</span>
+                                <span className="font-medium text-foreground">
+                                  {formatCurrency(task.value)}
+                                </span>
+                              </p>
+                              <p className="flex justify-between">
+                                <span>Net Value:</span>
+                                <span className="font-medium text-foreground">
+                                  {formatCurrency(task.netValue || task.value)}
+                                </span>
+                              </p>
+                              <div className="pt-2 border-t">
+                                <p className="text-xs">
+                                  Team: {getContractorNames(task.contractors)}
+                                </p>
+                              </div>
                             </div>
                           </CardContent>
                         </Card>
