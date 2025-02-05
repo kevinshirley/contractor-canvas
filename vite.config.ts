@@ -19,4 +19,15 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    lib: {
+      entry: "src/lib/modules.tsx",
+      name: "ReactMicrofrontend",
+      fileName: "react-microfrontend",
+      formats: ["es"], // Output as an ESM module
+    },
+    rollupOptions: {
+      external: ["react", "react-dom"], // Prevent bundling React
+    },
+  },
 }));
