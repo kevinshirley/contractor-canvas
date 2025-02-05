@@ -1,6 +1,4 @@
-# ProjectHub
-
-**Project Management Software**
+# ProjectHub: Project Management Software
 
 ## Project info
 
