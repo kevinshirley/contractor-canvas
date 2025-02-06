@@ -88,3 +88,15 @@ resource "aws_cloudfront_distribution" "react_cdn" {
     cloudfront_default_certificate = true
   }
 }
+
+resource "aws_s3_bucket_cors_configuration" "react_microfrontend_cors" {
+  bucket = aws_s3_bucket.react_microfrontend.id
+
+  cors_rule {
+    allowed_methods = ["GET"]
+    allowed_origins = ["*"]
+    allowed_headers = ["*"]
+    max_age_seconds = 3000
+  }
+}
+
