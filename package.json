@@ -1,6 +1,6 @@
 {
   "name": "softelo-projecthub",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "description": "React pages for the Projecthub app",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
